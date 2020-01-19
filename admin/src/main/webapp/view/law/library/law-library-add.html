@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+
+<head>
+    <meta charset="UTF-8">
+    <title>法务添加</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
+    <link rel="stylesheet" href="../../../lib/layui/css/layui.css" type="text/css"/>
+    <link rel="stylesheet" href="../../../css/xadmin.css">
+    <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
+    <script type="text/javascript" src="../../../js/xadmin.js"></script>
+    <script type="text/javascript" src="../../../js/baseUtils.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../../js/respond.js"></script><![endif]-->
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row">
+        <form class="layui-form">
+            <div class="layui-form-item">
+                <label class="layui-form-label">法务类型</label>
+                <div class="layui-input-inline">
+                    <select id="law_type_id">
+                        <option value="">请选择一个法务类型</option>
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">法务标题</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="title" name="title" placeholder="请输入标题" lay-verify="required"
+                           lay-verType="tips" autocomplete="off" class="layui-input" style="width: 600px"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">法务知识内容</label>
+                <div class="layui-input-inline" style="width: 600px">
+                    <textarea id="content" name="content" lay-verify="content" style="display: none;"></textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div style="text-align: center">
+                    <button class="layui-btn" lay-filter="add" lay-submit>保存</button>
+                    <!--<button id="reset" type="reset" class="layui-btn layui-btn-primary">重置</button>-->
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'layer', 'jquery', 'layedit'],
+            function () {
+                $ = layui.jquery;
+                var form = layui.form;
+                var layer = layui.layer;
+                var layedit = layui.layedit;
+
+                //初始化富文本编辑器
+                var index = layedit.build('content', {
+                    height: 220//默认高度
+                    //配置图片上传接口
+                    , uploadImage: {
+                        url: path+'/law/library/uploadImage.do' //接口url
+                        , type: 'post' //默认post
+                    }
+                });
+                form.render(); //更新全部
+                $.ajax({
+                    url: path+'/law/type/list.do',
+                    method: 'post',
+                    data:{"status":1},
+                    success: function (data) {
+                        for (var i in data) {
+                            var type = data[i];
+                            $("#law_type_id").append("<option value=" + type.id + ">" + type.title + "</option>");
+                            form.render("select");
+                        }
+                    }
+                });
+
+                //自定义验证规则
+                form.verify({
+                    content: function (value) {
+                        var text = layedit.getContent(index);
+                        if (text == '') {
+                            return "正文不能为空";
+                        }
+                        else
+                            layedit.sync(index);
+                    }
+                });
+                //监听重置按钮的点击事件
+                $("#reset").click(function () {
+                    //清空富文本编辑器的内容
+                    $(window.frames["LAY_layedit_1"].document).find('body').html('');
+                });
+
+                //监听提交
+                form.on('submit(add)',
+                        function (data) {
+                            var law_type_id = $("#law_type_id").val();
+//                        console.log(data.field);
+                            $.ajax({
+                                url: path+"/law/library/add.do",
+                                type: "POST",
+                                data: {
+                                    "title": data.field.title,
+                                    "law_type_id": law_type_id,
+                                    "content": data.field.content
+                                },
+                                dataType: "json",
+                                success: function (data) {
+                                    if (data == 1) {
+                                        layer.msg("保存成功", {icon: 1}, function () {
+
+                                            //关闭当前frame
+                                            xadmin.close();
+                                            // 可以对父窗口进行刷新
+                                            xadmin.father_reload();
+                                        });
+                                    }
+                                }
+                            });
+                            return false;
+                        });
+            });
+
+</script>
+<script>var _hmt = _hmt || [];
+(function () {
+    var hm = document.createElement("script");
+    hm.src = "https://hm.baidu.com/hm.js?b393d153aeb26b46e9431fabaf0f6190";
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(hm, s);
+})();</script>
+</body>
+
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../../lib/layui/css/layui.css" type="text/css"/>
+    <link rel="stylesheet" href="../../../css/xadmin.css">
+    <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
+    <script type="text/javascript" src="../../../js/xadmin.js"></script>
+    <script type="text/javascript" src="../../../js/baseUtils.js"></script>
+    <script type="text/javascript" src="../../../js/LawUtils.js"></script>
+    <title>法务学习</title>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../../js/respond.js"></script>
+    <![endif]-->
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body>
+<!--<div class="layui-fluid">-->
+    <!--<div class="layui-row layui-col-space15">-->
+        <!--<div class="layui-col-md12">-->
+            <!--<div class="layui-card">-->
+                <!--<div class="layui-card-header">-->
+                    <!--<button class="layui-btn"-->
+                            <!--onclick="xadmin.open('添加法务','./law-library-add.html',600,400)"><i class="layui-icon"/>添加-->
+                    <!--</button>-->
+                <!--</div>-->
+                <!--<div class="layui-card-body layui-table-body layui-table-main">-->
+                    <!--<table id="mytable" class="layui-table" lay-filter="mytable"></table>-->
+                <!--</div>-->
+            <!--</div>-->
+        <!--</div>-->
+    <!--</div>-->
+<!--</div>-->
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="keyword" id="keyword"  placeholder="请输入法务标题" autocomplete="off" class="layui-input ">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button class="layui-btn layui-btn-sm"  lay-submit="" lay-filter="search" id="search"><i class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table" id="mytable"  lay-filter="mytable"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--定义头工具栏按钮-->
+<script type="text/html" id="toolbar">
+    <button class="layui-btn layui-btn-sm" onclick="xadmin.open('添加法务','law-library-add.html',800,500)"><i class="layui-icon"></i>添加</button>
+</script>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn  layui-btn-sm" lay-event="detail">查看详情</a>
+    <a class="layui-btn layui-btn-sm" lay-event="edit">编辑</a>
+    <!--<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>-->
+    {{# if(d.status==1){    }}
+    <button type="button" class="layui-btn layui-btn-danger layui-btn-sm" style="background-color: #c2c2c2">
+        <a title="下架" style="color:white" lay-event="changeStatus">下架</a>
+    </button>
+    {{# }else if(d.status==2){  }}
+    <button type="button" class="layui-btn layui-btn-sm">
+        <a title="发布" style="color:white" lay-event="changeStatus">发布</a>
+    </button>
+    {{# }   }}
+</script>
+<script>
+    <!--分页查询-->
+    layui.use(['table', 'form', 'layer', 'jquery'], function () {
+        var table = layui.table;
+        var form = layui.form;   //只有执行了这一步，部分表单元素才会自动修饰成功
+        var layer = layui.layer;
+        $ = layui.jquery;
+        form.render();       //手动渲染
+        //第一个实例
+        var tableResult = table.render({
+            elem: '#mytable'
+            ,toolbar:'#toolbar'//开启头部工具栏
+            ,defaultToolbar: ['filter']//开启头部工具栏右侧的图标操作：筛选
+            , url: path+'/law/library/list.do' //数据接口
+            , method: 'get'
+            , response: {
+                statusCode: 1 //重新规定成功的状态码为 1，table 组件默认为 0
+            }
+            , parseData: function (res) { //res 即为原始返回的数据
+                var appeals =res.obj['informs'];
+                var typemap = res.obj['typeMap'];
+                var data = [];
+                for (var i in appeals){
+                    var appeal = appeals[i];
+                    var obj = {};
+                    var type,us;
+                    type= typemap[appeal.law_type_id];
+                    if (type != null){
+                        us = {'laytype':type['title'],'id':appeal['id']};
+                    }
+                    Object.assign(obj, appeal,us);
+                    data.push(obj);
+
+                }
+                console.log(data);
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.count, //解析数据长度
+                    "data": data //解析数据列表
+                };
+            }
+            , page: true //开启分页
+            , limit: 10
+            , limits: [10, 20, 30]
+            , cols: [[ //表头
+//                {type:'checkbox'},  //开启复选框
+                {field: 'id', title: 'ID',width:80,align: 'center'}
+                , {field: 'laytype', title: '法务类型',width:140, align: 'center'}
+                , {field: 'title', title: '法务标题',width:200, align: 'center'}
+                , {field: 'content', title: '法务知识内容',width:200, align: 'center'}
+                , {field: 'read', title: '阅读人数',width:120, align: 'center'}
+                , {field: 'status', title: '数据状态',width:120, align: 'center'}
+                , {field: 'create_time', title: '创建时间',width:220, align: 'center',templet:'#createTime'}
+                ,{field:'operation',title:'操作',width:250,toolbar: '#barDemo',align:'center'}   //添加操作
+            ]]
+            , done: function (res, curr, count) {
+                //如果是异步请求数据方式，res即为你接口返回的信息。
+                //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+                $("[data-field='status']").children().each(function(){
+                    if($(this).text()=="1"){
+                        $(this).html('<button class="layui-btn layui-btn-sm">已发布</button>');
+                    }else if($(this).text()=="2"){
+                        $(this).html('<button class="layui-btn layui-btn-danger layui-btn-sm">已下架</button>');
+                    }
+                });
+            }
+        });
+
+        //监听工具条
+        table.on('tool(mytable)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'detail'){
+                toolWindowLibray("查看详情内容","law-library-view.html",500,500,data);
+            } else
+            if(obj.event === 'del'){
+                layer.confirm('真的删除么', function(index){
+                    obj.del();
+                    Delete(data.id,index);
+//                    layer.close(index);
+                });
+            } else
+            if(obj.event === 'edit'){ //编辑
+                toolWindowLibray("编辑法务内容","law-library-edit.html?id="+data.id+"&layid="+data.law_type_id+"",500,500,data);
+            }else if(obj.event === 'changeStatus'){
+                changeStatus(data);
+            }
+        });
+
+        //监听条件查询点击事件
+        form.on('submit(search)', function(data){
+            //当前容器的全部表单字段，名值对形式：{name: value}
+            var keyword =data.field['keyword'];
+            tableResult.reload({
+                url:path+'/law/library/search.do',
+                method: 'post',
+                where:{
+                    keyword:keyword,
+
+                },
+                page:{
+                    curr:1
+                }
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+        //修改法务的数据状态
+        function changeStatus(data){
+            $.ajax({
+                url:path+"/law/library/changeStatus.do",
+                type:"POST",
+                data:{"id":data.id,"status":data.status},
+                dataType:"json",
+                success:function (data) {
+                    if (data == 1) {
+                        layer.msg("操作成功", {icon: 1});
+                        var cur = $(".layui-laypage-em").next().html();//获取当前页
+                        window.location.reload();
+                    } else {
+                        layer.msg("操作失败", {icon: 5});
+                    }
+                }
+            });
+        }
+
+        //删除法务
+        function Delete(id,index) {
+            $.ajax({
+                url:path+"/law/library/delete.do",
+                type:"POST",
+                data:{"id":id},
+                dataType:"json",
+                success:function (data) {
+                    if(data==1){
+                        layer.close(index);
+                        layer.msg("删除成功", {icon: 6});
+                    }
+                }
+            });
+        }
+    });
+
+
+</script>
+<script id="createTime" type="text/html">
+    {{#
+    if (d.create_time!=0){
+    var date = new Date();
+    var createTime = d.create_time+"000";
+    date.setTime(createTime);
+    return date.Format("yyyy-MM-dd hh:mm:ss");
+    }
+    return '没有记录';
+    }}
+</script>
+</body>
+</html>

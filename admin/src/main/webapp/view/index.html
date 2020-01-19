@@ -1,0 +1,359 @@
+<!doctype html>
+<html class="x-admin-sm">
+    <head>
+        <meta charset="UTF-8">
+        <title>智慧服务中心</title>
+        <meta name="renderer" content="webkit|ie-comp|ie-stand">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <!--不缓存页面-->
+        <meta http-equiv="pragma" content="no-cache">
+        <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+        <meta http-equiv="expires" content="Wed, 26 Feb 1997 08:21:57 GMT">
+        <meta http-equiv="expires" content="-1">
+        <link rel="stylesheet" href="../css/font.css">
+        <link rel="stylesheet" href="../css/xadmin.css">
+        <!-- <link rel="stylesheet" href="./css/theme5.css"> -->
+        <script src="../lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="../js/xadmin.js"></script>
+        <script type="text/javascript" src="../js/jquery.min.js"></script>
+        <script type="text/javascript" src="../js/jquery.cookie.js"></script>
+        <script type="text/javascript" src="../js/baseUtils.js"></script>
+        <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+        <!--[if lt IE 9]>
+        <script type="text/javascript" src="../js/html5shiv.min.js"></script>
+        <script type="text/javascript" src="../js/respond.js"></script>
+        <![endif]-->
+        <script>
+            // 是否开启刷新记忆tab功能
+            //var is_remember = true;
+        </script>
+    </head>
+    <body class="index">
+        <!-- 顶部开始 -->
+        <div class="container">
+            <div class="logo">
+                <a href="./index.html">智慧服务中心</a></div>
+            <div class="left_open">
+                <a><i title="展开左侧栏" class="iconfont">&#xe699;</i></a>
+            </div>
+
+            <ul class="layui-nav right" lay-filter="" style="min-width: 150px;">
+                <li class="layui-nav-item">
+                    <a id="adminName" href="javascript:;"></a>
+                    <dl class="layui-nav-child">
+                        <!-- 二级菜单 -->
+                        <dd>
+                            <a id="mine" onclick='edit("个人信息","admin/admin-mine.html",400,400)'>个人信息</a></dd>
+                        <dd>
+                            <a id="reset" onclick='edit("修改密码","admin/admin-password.html",400,400)'>修改密码</a></dd>
+                        <dd>
+                            <a id="change" onclick="exit()">切换账户</a></dd>
+                        <dd>
+                            <a id="exit" onclick="exit()">退出</a></dd>
+                    </dl>
+                </li>
+               <!-- <li class="layui-nav-item to-index">
+                    <a href="/">前台首页</a></li>-->
+            </ul>
+        </div>
+        <!-- 顶部结束 -->
+        <!-- 中部开始 -->
+        <!-- 左侧菜单开始 -->
+        <div class="left-nav">
+            <div id="side-nav">
+                <ul id="nav">
+                    <li>
+                        <a href="javascript:;">
+                            <i class="iconfont left-nav-li" lay-tips="用户管理">&#xe6b8;</i>
+                            <cite>用户管理</cite>
+                            <i class="iconfont nav_right">&#xe697;</i></a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a id="user_deal" style="display: none" onclick="xadmin.add_tab('用户列表','user/member-list.html',true)">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>用户列表</cite></a>
+                            </li>
+                            <li>
+                                <a id="admin_deal"  style="display: none" onclick="xadmin.add_tab('管理员列表','admin/admin-list.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>管理员列表</cite></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;">
+                            <i class="iconfont left-nav-li" lay-tips="军检列表">&#xe723;</i>
+                            <cite>军检列表</cite>
+                            <i class="iconfont nav_right">&#xe697;</i></a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a id="appeal_view"  style="display: none" onclick="xadmin.add_tab('军检申述','inspect/inspect-appeal.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>军检申述</cite></a>
+                            </li>
+                            <li>
+                                <a id="inform_view" style="display: none" onclick="xadmin.add_tab('军检举报','inspect/inspect-inform.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>军检举报</cite></a>
+                            </li>
+                            <li>
+                                <a id="sue_view" style="display: none" onclick="xadmin.add_tab('军检控告','inspect/inspect-sue.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>军检控告</cite></a>
+                            </li>
+                            <li>
+                                <a id="appeal_type" style="display: none" onclick="xadmin.add_tab('军检类型','inspect/inspect-type.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>军检类型</cite></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a  href="javascript:;">
+                        <i class="iconfont left-nav-li" lay-tips="新闻管理">&#xe723;</i>
+                        <cite>新闻管理</cite>
+                        <i class="iconfont nav_right">&#xe697;</i></a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a id="news" style="display: none" onclick="xadmin.add_tab('新闻列表','news/news-list.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>新闻列表</cite>
+                                </a>
+                            </li>
+                            <li>
+                                <a id="news_type" style="display: none" onclick="xadmin.add_tab('新闻类型','news/newsType-list.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>新闻类型</cite>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;">
+                            <i class="iconfont left-nav-li" lay-tips="法务学习">&#xe723;</i>
+                            <cite>法务学习</cite>
+                            <i class="iconfont nav_right">&#xe697;</i></a>
+                        <ul class="sub-menu">
+                            <li>
+                                <a id="law_library" style="display: none" onclick="xadmin.add_tab('法务列表','law/library/law-library.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>法务列表</cite></a>
+                            </li>
+                            <li>
+                                <a id="law_type" style="display: none" onclick="xadmin.add_tab('法务类型','law/library/law-type.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>法务类型</cite></a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript:;">
+                            <i class="iconfont left-nav-li" lay-tips="留言管理">&#xe723;</i>
+                            <cite>留言管理</cite>
+                            <i class="iconfont nav_right">&#xe697;</i></a>
+                        <ul class="sub-menu" >
+                            <li>
+                                <a id="law_help1" style="display: none" class="help_reply" style="display: none" onclick="xadmin.add_tab('法律咨询','law/help/advisory-list.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>法律咨询</cite></a>
+                            </li>
+                            <li>
+                                <a id="law_help2" style="display: none" class="help_reply" style="display: none" onclick="xadmin.add_tab('法律援助','law/help/assistance-list.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>法律援助</cite></a>
+                            </li>
+                            <li>
+                                <a id="law_help3" style="display: none" class="help_reply" style="display: none" onclick="xadmin.add_tab('司法救助','law/help/rescue-list.html')">
+                                    <i class="iconfont">&#xe6a7;</i>
+                                    <cite>司法救助</cite></a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!-- <div class="x-slide_left"></div> -->
+        <!-- 左侧菜单结束 -->
+        <!-- 右侧主体开始 -->
+        <div class="page-content">
+            <div class="layui-tab tab" lay-filter="xbs_tab" lay-allowclose="false">
+                <ul class="layui-tab-title">
+                    <li class="home">
+                        <i class="layui-icon">&#xe68e;</i>我的桌面</li></ul>
+                <div class="layui-unselect layui-form-select layui-form-selected" id="tab_right">
+                    <dl>
+                        <dd data-type="this">关闭当前</dd>
+                        <dd data-type="other">关闭其它</dd>
+                        <dd id="deleteAll" data-type="all">关闭全部</dd></dl>
+                </div>
+                <div class="layui-tab-content">
+                    <div class="layui-tab-item layui-show">
+                        <iframe src='./welcome.html' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+                    </div>
+                </div>
+                <div id="tab_show"></div>
+            </div>
+        </div>
+        <div class="page-content-bg"></div>
+        <style id="theme_style"></style>
+        <!-- 右侧主体结束 -->
+        <!-- 中部结束 -->
+
+        <script>
+            isLogined();
+            inspectTypeList();
+            adminAuthority();
+            //判断是否已经登录
+            function isLogined() {
+                var admin = window.sessionStorage.admin;
+                if (!CheckIsNullOrEmpty(admin)){
+                    $.ajax({
+                        url: path+'/admin/isLogin.do',
+                        method: 'GET',
+                        dataType: 'JSON',
+                        sync:false,
+                        success:function (data) {
+                            if (!data.success && !CheckIsNullOrEmpty(data.data)){
+                                window.sessionStorage.admin = JSON.stringify(data.data);
+                                location.href=path+'/view/index.html';
+                            }else{
+                                exit();
+                                location.href=path+'/login.html';
+                            }
+                        }
+                    });
+                }
+            }
+            //获取军检类型列表
+            function inspectTypeList() {
+                $.ajax({
+                    url:path+"/inspect/appeal/types.do",
+                    method:"get",
+                    async: false,
+                    success:function (data) {
+                        if (data.success){
+                            var typeMap = data.data;
+                            window.sessionStorage.inspectTypeMap = JSON.stringify(typeMap);
+                        }
+                    }
+                });
+            }
+            //获取权限
+            function adminAuthority() {
+                //获取管理员权限
+                $.ajax({
+                    url:path+"/authority/mine.do",
+                    method:"get",
+                    async: false,
+                    success:function (data) {
+                        if (data.success){
+                            var authorities = data.data;
+                            window.sessionStorage.authorities = JSON.stringify(authorities);
+                        }
+                    }
+                });
+                //获取全部权限列表
+                $.ajax({
+                    url:path+"/authority/list.do",
+                    method:"get",
+                    async: false,
+                    success:function (data) {
+                        if (data.success){
+                            var authorityList = data.data;
+                            console.log(authorityList);
+                            window.sessionStorage.authorityList = JSON.stringify(authorityList);
+                        }
+                    }
+                });
+            }
+            layui.use(['jquery','layer'],function () {
+                //$ = layui.jquery;
+                var layer = layui.layer;
+                //获取个人信息
+                var str = window.sessionStorage.admin;
+                if (str == null){
+                    $('#deleteAll').click();
+                }
+                var  admin = $.parseJSON(str);
+                var authorities = $.parseJSON(window.sessionStorage.authorities);
+                var authorityList = $.parseJSON(window.sessionStorage.authorityList);
+                $('#adminName').text(admin.realname);
+                //获取用户的权限,只展示有权限的页面
+                for (var i in authorities){
+                    var auth1 = authorities[i];
+                    var auth2 = authorityList[i];
+                    var name = auth2["name"];
+                    if (auth1.status==1){
+                        $('#'+name).css('display','block');
+                    }
+                }
+            });
+
+            //个人信息修改
+            function edit(title,url,w,h) {
+                layer.open({
+                    type: 2,
+                    area: [w+'px', h +'px'],
+                    fix: true, //固定
+                    maxmin: true,
+                    shade:0.4,
+                    title: title,
+                    content: url,
+                    end:function () {
+                        //更新用户名
+                        admin = $.parseJSON(window.sessionStorage.admin);
+                        $('#adminName').text(admin.realname);
+                    }
+                });
+            }
+            //退出登陆
+            function exit() {
+                //删除用户信息
+                window.sessionStorage.clear();
+                //通知后台退出登陆
+                $.ajax({
+                    url:path+'/admin/exit.do',
+                    method:'get',
+                    async: false,//改为同步请求
+                    success:function (data) {
+                    }
+                });
+                //关闭所有的tag
+                $('#deleteAll').click();
+                location.href=path+'/login.html';
+            }
+
+            function exitMsg() {
+                layui.layer.open({
+                    type: 0
+                    ,offset: 'auto'
+                    ,id: 'exit' //防止重复弹出
+                    ,content: '<div style="padding: 20px 100px;">成功退出</div>'
+                    ,btn: '关闭'
+                    ,btnAlign: 'c' //按钮居中
+                    ,shade: 0 //不显示遮罩
+                    ,yes: function(index, layero){
+                        layer.close(index);
+                        location.href=path+'/login.html';
+                    }
+                });
+            }
+            /*var beginTime = 0;//执行onbeforeunload的开始时间
+            var differTime = 0;//时间差
+            window.onunload = function (){
+                differTime = new Date().getTime() - beginTime;
+                if(differTime <= 10) {
+                    console.log("关闭");
+                    exit();
+                }else{
+                    console.log("刷新");
+                }
+            };
+            window.onbeforeunload = function (){
+                beginTime = new Date().getTime();
+            };*/
+        </script>
+    </body>
+
+</html>

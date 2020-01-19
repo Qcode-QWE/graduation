@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新闻预览</title>
+    <link rel="stylesheet" href="../../css/font.css">
+    <link rel="stylesheet" href="../../css/xadmin.css">
+    <script type="text/javascript" src="../../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../js/xadmin.js"></script>
+    <script type="text/javascript" src="../../js/baseUtils.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../js/respond.js"></script><![endif]-->
+
+    <style type="text/css">
+        body{
+            text-align:center;
+        }
+        #div{
+            width: 850px;
+            margin:auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-col-md12">
+            <div id="div">
+                <div class="layui-card">
+                    <div class="layui-card-body" id="div2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        layui.use(['layer','jquery'], function() {
+            $ = layui.jquery;
+            var layer = layui.layer;
+
+            //获取url参数
+            function GetRequest() {
+                var url = decodeURI(location.search); //获取url中"?"符后的字串
+                var theRequest = new Object();
+                if (url.indexOf("?") != -1) {
+                    var str = url.substr(1);
+                    strs = str.split("&");
+                    for(var i = 0; i < strs.length; i ++) {
+                        theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+                    }
+                }
+                return theRequest;
+            }
+            //获取id
+            var id = GetRequest()['id'];
+            //异步获取用户数据
+            $.ajax({
+                url: path+"/news/"+id+".do",
+                type:"get",
+                contentType: 'application/json',
+                dataType:"json",
+                success:function (data) {
+                    //回显数据
+                    var news = data.news;
+                    var news_detail=data.news_detail;
+                    if (data.success){
+                        $("#div").prepend("<h2>"+news.title+"</h2><br>");
+                        if(null != news_detail)
+                            $("#div2").append(news_detail.content);
+                    }else {
+                        layer.msg('预览新闻失败', {icon: 2});
+                    }
+                },
+                error:function (data) {
+                    layer.msg('服务器出现了点问题', {icon: 5});
+                }
+            });
+        })
+
+    </script>
+</body>
+</html>

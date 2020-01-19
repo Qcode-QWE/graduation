@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    
+    <head>
+        <meta charset="UTF-8">
+        <title>新增管理员</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="../../css/font.css">
+        <link rel="stylesheet" href="../../css/xadmin.css">
+        <script type="text/javascript" src="../../lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="../../js/xadmin.js"></script>
+        <script type="text/javascript" src="../../js/jquery.min.js"></script>
+        <script type="text/javascript" src="../../js/baseUtils.js"></script>
+        <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+        <!--[if lt IE 9]>
+        <script type="text/javascript" src="../../js/html5shiv.min.js"></script>
+        <script type="text/javascript" src="../../js/respond.js"></script>
+        <![endif]-->
+    </head>
+    <body>
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <form class="layui-form" lay-filter="form" id="form">
+                <div class="layui-form-item">
+                    <label for="status" id="statusName" class="layui-form-label" value="1">启用</label>
+                    <div class="layui-input-block">
+                        <input id="status" name="status" value="1" type="checkbox" name="status" lay-skin="switch" lay-filter="status">
+                    </div>
+                </div>
+                <div class="layui-form-item" style="display:none">
+                    <label for="id" id="" class="layui-form-label">ID</label>
+                    <div class="layui-input-block">
+                        <input id="id" name="id" type="text">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="nickname" class="layui-form-label">
+                        <span class="x-red">*</span>昵称</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="nickname" name="nickname" required="" lay-verify="nikename" autocomplete="off" class="layui-input"> <div id="isExist" style="height:15px"></div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="realname" class="layui-form-label">
+                        <span class="x-red">*</span>真实姓名</label>
+                    <div class="layui-input-inline">
+                        <input type="text" id="realname" name="realname" required="" lay-verify="" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label for="password" class="layui-form-label">
+                        <span class="x-red">*</span>密码</label>
+                    <div class="layui-input-inline">
+                        <input type="password" id="password" name="password" required="" lay-verify="pass" autocomplete="off" class="layui-input"></div>
+                    <div class="layui-form-mid layui-word-aux">6到16个字符</div></div>
+                <div class="layui-form-item">
+                    <label for="repass" class="layui-form-label">
+                        <span class="x-red">*</span>确认密码</label>
+                    <div class="layui-input-inline">
+                        <input type="password" id="repass" name="repass" required="" lay-verify="repass" autocomplete="off" class="layui-input"></div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">权限</label>
+                    <div class="layui-input-block" id="authority">
+
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block">
+                        <button class="layui-btn" lay-submit id="formBut" lay-filter="formBut">新增</button>
+                        <button class="layui-btn"  lay-filter="reset">重设</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script>
+        layui.use(['form', 'layer','tree','util'], function() {
+            $ = layui.jquery;
+            var form = layui.form, layer = layui.layer;
+            var tree = layui.tree;
+            var util = layui.util;
+            setauthorities();
+            //用户状态改变时,对应的文字改变
+            form.on('switch(status)', function(data){
+                //开
+                if (data.elem.checked){
+                    $("#statusName").text('停用');
+                }else{
+                    $("#statusName").text('启用');
+                }
+                form.render();
+            });
+            //监控提交
+            form.on('submit(formBut)', function(data){
+                //异步提交表单
+                var field = data.field;
+                var admin = {};
+                admin.nickname = field['nickname'];
+                admin.realname = field['realname'];
+                admin.password = field['password'];
+                if (field['status']==1){
+                    admin.status = 1;
+                }else{
+                    admin.status = 2;
+                }
+                var authorities=[];
+                $("#authority input[type=checkbox]").each(function(i){
+                    var authority = {};
+                    authority.authoruth_id = $(this).attr('id');
+                    if ($(this).prop("checked")){
+                        authority.status = 1;
+                    }else {
+                        authority.status = 2;
+                    }
+                    authorities.push(authority);
+                });
+                admin = JSON.stringify(admin);
+                authorities = JSON.stringify(authorities);
+                $.ajax({
+                    url:path+'/admin/add.do',
+                    method:'post',
+                    traditional: true,
+                    data:{'admin':admin,'authorities':authorities},
+                    dataType:'JSON',
+                    success:function (data) {
+                        if (data.success){
+                            message('新增成功',1,layer);
+                        }else{
+                            message('新增失败',2,layer);
+                        }
+                    },
+                    error:function (data) {
+                        message('服务器出了点问题',2,layer);
+                    }
+                });
+                return false;
+            });
+            //监控重设
+            form.on('submit(reset)', function(data){
+                window.location.reload();
+            });
+
+             //自定义验证规则
+             form.verify({
+                nikename: function(value) {
+                    if (value.length < 3) {
+                    return '昵称至少得3个字符啊';
+                 }
+                var msg;
+                $.ajax({
+                    url:path+'/admin/add/'+value+'.do',
+                    method:'get',
+                    success:function (data) {
+                        if (!data.success){
+                            msg =  '用户名已存在';
+                        }
+                    }
+                });
+                return msg;
+             },
+             pass: [/(.+){6,12}$/, '密码必须6到12位'],
+             repass: function(value) {
+                    if ($('#password').val() != $('#repass').val()) {
+                    return '两次密码不一致';
+                    }
+                }
+
+             });
+
+            function setauthorities() {
+                //设置权限列表
+                var list = $.parseJSON(window.sessionStorage.authorityList);
+                var html = "";
+                console.log(list);
+                for (var i in list){
+                    html += '<input id="'+list[i].id+'" type="checkbox" name="'+list[i].name+'"  title="'+list[i].title+'" value="1" checked lay-skin="primary">';
+                }
+                $("#authority").html(html);
+                form.render();
+            }
+
+        });
+        //对用户名进行校验
+        $('#nickname').blur( function (){
+            var name = $('#nickname').val();
+            if (name.length<=0){
+                return;
+            }
+            $.ajax({
+                url:path+'/admin/add/'+name+'.do',
+                method:'get',
+                success:function (data) {
+                    if (data.success){
+                        $('#isExist').html('<i class="layui-icon layui-icon-ok-circle"></i>');
+                    }else{
+                        $('#isExist').html('<i class="layui-icon layui-icon-close-fill">用户已存在</i> ');
+                    }
+                }
+            });
+        });
+
+    </script>
+
+    </body>
+
+</html>

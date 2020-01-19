@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="UTF-8">
+    <title>查看申诉人</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../../css/font.css">
+    <link rel="stylesheet" href="../../css/xadmin.css">
+    <script type="text/javascript" src="../../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../js/xadmin.js"></script>
+    <script type="text/javascript" src="../../js/InspectUtils.js"></script>
+    <script type="text/javascript" src="../../js/baseUtils.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../js/respond.js"></script> <![endif]--></head>
+
+<body>
+<div class="layui-fluid" style="margin:0 auto; width:100%;height:100%;">
+    <div class="layui-row">
+        <form class="layui-form" lay-filter="form" id="form">
+            <div class="layui-form-item">
+                <label  id="process_status" class="layui-form-label" value="1">处理状态</label>
+                <input id="type1" type="radio" name="process_status" value="1" lay-filter="type" title="已提交">
+                <input id="type2" type="radio" name="process_status" value="2" lay-filter="type" title="已受理">
+                <input id="type3" type="radio" name="process_status" value="3" lay-filter="type" title="已完结">
+            </div>
+            <div class="layui-form-item" >
+                <div class="layui-input-block">
+                <button class="layui-btn" lay-submit id="butt" lay-filter="butt">提交</button>
+                <button class="layui-btn" lay-submit id="return" lay-filter="return">返回</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'layer'], function() {
+        $ = layui.jquery;
+        var form = layui.form,
+                layer = layui.layer;
+        var data = GetRequest();
+        var id = data['id']; //获取url中"?"符后的字串
+        var process_status =data['process_status'];
+        var type = data['type'];
+        for (var i =1;i<=process_status;i++){
+            $("#type"+i).prop("disabled",true);
+        }
+        $("#type"+process_status).prop("checked",true);
+        var title = "提交";
+        if(process_status==1){
+            title = "提交";
+        }else if(process_status==2) {
+            title = "受理";
+        }else if (process_status==3){
+            title = "完结";
+        }
+        $("#butt").html(title);
+        form.render();
+        form.on('submit(butt)', function(data) {
+            var t = data.field['process_status'];
+            if(t == process_status){
+                layer.msg('状态没有改变,请修改状态!', {
+                    time: 2000, //20s后自动关闭
+                    btn: ['好的']
+                });
+                return false;
+            }
+            layer.confirm('确认要设置为'+title+'吗？',function(index){
+                var url = "";
+                if (type==1){
+                    url = path+'/inspect/inform/ps.do';
+                }else if (type == 2){
+                    url = path+'/inspect/sue/ps.do';
+                }else if (type==3){
+                    url = path+'/inspect/appeal/ps.do'
+                }
+                $.ajax({
+                    url:url,
+                    method:'post',
+                    data:{'id':id, 'type':t},
+                    dataType:'JSON',
+                    success:function (data) {
+                        if (data.success){
+                            message('修改成功',1,layer);
+                        }else{
+                            message('修改失败',2,layer);
+                        }
+                    },
+                    error:function (data) {
+                        message('修改失败',2,layer);
+                    }
+                })  ;
+
+
+            });
+            return false;
+        });
+        form.on('submit(return)',function (data) {
+            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            parent.layer.close(index); //再执行关闭
+            return false;
+        });
+
+        form.on('radio(type)', function(data){
+           var t = data.value;
+            var title = "提交";
+            if (t==1){
+                title = "提交";
+            }else if (t == 2){
+                title = "受理";
+            }else if (t == 3){
+                title = "完结";
+            }
+            $("#butt").html(title);
+            console.log(title);
+            form.render();
+        });
+
+
+
+
+    });
+    function child(data,type){
+
+    }
+
+</script>
+
+
+
+</body>
+
+</html>

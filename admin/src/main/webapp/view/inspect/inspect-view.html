@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="UTF-8">
+    <title>用户信息编辑</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../../css/font.css">
+    <link rel="stylesheet" href="../../css/xadmin.css">
+    <script type="text/javascript" src="../../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../js/xadmin.js"></script>
+    <script type="text/javascript" src="../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../js/InspectUtils.js"></script>
+    <script type="text/javascript" src="../../js/baseUtils.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../js/respond.js"></script>  <![endif]--></head>
+
+<body id="body">
+<div class="layui-fluid">
+    <div class="layui-row">
+        <table class="layui-table" lay-even="" lay-skin="row">
+            <tbody>
+                <tr><td class="layui-bg-blue">详细内容</td></tr>
+                <tr >
+                    <td id="text"></td>
+                </tr>
+                <tr><td class="layui-bg-blue">证明材料</td></tr>
+                <tr id="image">
+                    <td><div id="images">
+                    </div></td>
+                </tr>
+                <tr>
+                    <form  id="form" method="post">
+                        <div class="layui-form-item" style="display: none">
+                            <div class="layui-input-inline">
+                                <input type="text" id="id" name="id"  autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                                <button class="layui-btn layui-btn-disabled" disabled id="load" >下载</button>
+                                <button class="layui-btn" id="but">返回</button>
+                        </div>
+                    </form>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    var receipt = "1";
+    layui.use(['form', 'layer','layedit'], function() {
+        //$ = layui.jquery;
+        var form = layui.form;
+        var layer = layui.layer;
+        var layedit = layui.layedit;
+        //返回
+        $('#but').click(function () {
+            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            parent.layer.close(index); //再执行关闭
+            return false;
+        });
+    });
+
+    function child(data,type) {
+        var text = data.detail;
+        var id = data.id;
+        var imgs = data.proof;
+        receipt = data.receipt;
+        $('#text').html(text);
+        $("#id").val(id);
+        imgs = imgs.split(",");
+        var html = "";
+        var ip = getIp();
+        for (var i in imgs){
+            var img;
+            img = ip+imgs[i];
+            html += '<div><img style="max-width:1000px;height:auto;" src='+img+' ></div>';
+            html +='<br/>'
+        }
+        $('#images').html(html);
+        //表单
+        var url ;
+        //权限控制
+        if (type == 1){
+            if (hasAuthority('inform_download')){
+                url =path+"/inspect/inform/load.do";
+                $('#load').removeClass('layui-btn-disabled');
+                $('#load').attr('disabled',false);
+            }
+        }else if (type == 2){
+            if (hasAuthority('sue_download')){
+                url =path+"/inspect/sue/load.do";
+                $('#load').removeClass('layui-btn-disabled');
+                $('#load').attr('disabled',false);
+            }
+        }else if (type == 3){
+            if (hasAuthority('appeal_download')){
+                url = path+"/inspect/appeal/load.do";
+               $('#load').removeClass('layui-btn-disabled');
+               $('#load').attr('disabled',false);
+            }
+        }
+        $("#form").attr("action",url);
+    }
+
+    
+    
+</script>
+
+</body>
+
+</html>

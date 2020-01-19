@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    <head>
+        <meta charset="UTF-8">
+        <title>个人信息</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="../../css/font.css">
+        <link rel="stylesheet" href="../../css/xadmin.css">
+        <script type="text/javascript" src="../../lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="../../js/xadmin.js"></script>
+        <script type="text/javascript" src="../../js/jquery.min.js"></script>
+        <script type="text/javascript" src="../../js/jquery.cookie.js"></script>
+        <script type="text/javascript" src="../../js/baseUtils.js"></script>
+        <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+        <!--[if lt IE 9]>
+        <script type="text/javascript" src="../../js/html5shiv.min.js"></script>
+        <script type="text/javascript" src="../../js/respond.js"></script>
+        <![endif]--></head>
+    
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form" lay-filter="form" id="form">
+                    <div class="layui-form-item" style="display:none">
+                        <label for="id"  class="layui-form-label">ID</label>
+                        <div class="layui-input-block">
+                            <input id="id" name="id" type="text">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="nickname" class="layui-form-label">
+                            <span class="x-red">*</span>昵称</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="nickname" name="nickname" required="" lay-verify="" autocomplete="off" class="layui-input"></div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="realname" class="layui-form-label">
+                            <span class="x-red">*</span>真实姓名</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="realname" name="realname" required="" lay-verify="" autocomplete="off" class="layui-input"></div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">权限</label>
+                        <div class="layui-input-block" id="authority" >
+
+                            <!--<input type="checkbox" id="user_deal" name="user_deal"   title="处理用户" disabled lay-skin="primary">-->
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-submit id="formBut" lay-filter="formBut">保存</button>
+                            <!--<button class="layui-btn"  lay-filter="reset">重设</button>-->
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+
+            layui.use(['form', 'layer','tree','util'], function() {
+                //$ = layui.jquery;
+                var form = layui.form,
+                layer = layui.layer;
+                var tree = layui.tree;
+                var util = layui.util;
+                //异步获取用户数据
+                $.ajax({
+                    url: path+"/admin/mine.do",
+                    type:"get",
+                    contentType: 'application/json',
+                    dataType:"json",
+                    success:function (data) {
+                        //回显数据
+                        var admin = data.data;
+                        if (data.success){
+                            form.val("form", {
+                                id:admin.id,
+                                nickname:admin.nickname,
+                                realname:admin.realname,
+                                status:admin.status
+                            });
+                            checkAuthority(admin);
+                        }else {
+                            $("#form").html("没有该用户!或者服务器出现了一点小问题!");
+                        }
+                    },
+                    error:function (data) {
+                        $("#form").html("<div style='text-align:center'>服务器出现了一点小问题!</div>");
+                    }
+                });
+                //对表单数据进行处理
+                function checkAuthority(admin) {
+                    //状态
+                    if (admin['status']==1){
+                        $("#status").attr("checked",true);
+                        $("#statusName").text('停用');
+                    }else{
+                        $("#status").attr("checked",false);
+                        $("#statusName").text('启用');
+                    }
+                    //权限管理
+                    //获取管理员的权限,并转为map
+                    var authorities = $.parseJSON(window.sessionStorage.authorities);
+                    var list = $.parseJSON(window.sessionStorage.authorityList);
+                    var html = "";
+                    for (var i in list){
+                        var checked = authorities[i].status==1?'checked':'';
+                        html += '<input type="checkbox"  title="'+list[i].title+'" disabled  '+checked+' lay-skin="primary">';
+                    }
+                    $("#authority").html(html);
+                    form.render();
+                }
+
+                //用户状态改变时,对应的文字改变
+                form.on('switch(status)', function(data){
+                    //开
+                    if (data.elem.checked){
+                        $("#statusName").text('停用');
+                    }else{
+                        $("#statusName").text('启用');
+                    }
+                    form.render();
+                });
+                //监控提交
+                form.on('submit(formBut)', function(data){
+                    //异步提交表单
+                    //var field = data.field;
+                    $("input[type=checkbox]").each(function(i){
+                        data.field[$(this).attr('id')] = null;
+                    });
+                    $.ajax({
+                        url:path+'/admin/edit/mine.do',
+                        method:'post',
+                        data:data.field,
+                        dataType:'JSON',
+                        success:function (data) {
+                            if (data.success){
+                                //将新的admin存到cookie中
+                                console.log(data.data);
+                                //$.cookie('admin',JSON.stringify(data.data),{path:"/"});
+                                window.sessionStorage.admin = JSON.stringify(data.data);
+                                message('修改成功',1);
+                            }else{
+                                message('修改失败',2);
+                            }
+                        },
+                        error:function (data) {
+                            message('服务器出了点问题',2);
+                        }
+                    });
+                    return false;
+                });
+                //监控重设
+                form.on('submit(reset)', function(data){
+                    window.location.reload();
+                });
+
+                function message(text,type) {
+                    layer.open({
+                        type: 0
+                        ,offset: 'auto'
+                        ,id: 'message' //防止重复弹出
+                        ,content: '<div style="padding: 20px 100px;">'+ text +'</div>'
+                        ,btn: '关闭'
+                        ,btnAlign: 'c' //按钮居中
+                        ,shade: 0 //不显示遮罩
+                        ,yes: function(index, layero){
+                            layer.close(index);
+                            if (type != null && type == 1){
+                                var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                                parent.layer.close(index); //再执行关闭
+                            }
+                        }
+                    });
+                }
+            });
+        </script>
+
+    </body>
+
+</html>

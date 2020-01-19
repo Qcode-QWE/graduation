@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../../css/font.css">
+    <link rel="stylesheet" href="../../../css/xadmin.css">
+    <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
+    <script type="text/javascript" src="../../../js/xadmin.js"></script>
+    <script type="text/javascript" src="../../../js/baseUtils.js"></script>
+    <script type="text/javascript" src="../../../js/LawUtils.js"></script>
+    <title>法务类型</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../../js/respond.js"></script><![endif]-->
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body layui-table-body layui-table-main">
+                    <table class="layui-table" id="mytable" lay-filter="mytable"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--定义头工具栏按钮-->
+<script type="text/html" id="toolbar">
+    <button class="layui-btn  layui-btn-sm" onclick="xadmin.open('添加法务类型','law-type-add.html',400,200)">
+        <i class="layui-icon"></i>添加
+    </button>
+</script>
+<script type="text/html" id="barDemo">
+    <a lay-event="edit" href="javascript:;" style="margin-right: 10px"><i class="layui-icon" >&#xe642;</i>编辑</a>
+    {{# if(d.status==1){    }}
+    <a lay-event="changeStatus" style="color: #c2c2c2" href="javascript:;"><i class="layui-icon">&#x1007;</i>停用</a>
+    {{# }else if(d.status==2){  }}
+    <a lay-event="changeStatus" href="javascript:;"><i class="layui-icon">&#x1005;</i>启用</a>
+    {{# }   }}
+</script>
+<script>
+    layui.use(['table', 'form', 'layer', 'jquery'], function () {
+        var table = layui.table;
+        var form = layui.form;   //只有执行了这一步，部分表单元素才会自动修饰成功
+        var layer = layui.layer;
+        $ = layui.jquery;
+        form.render();       //手动渲染
+        //第一个实例
+        var tableResult = table.render({
+            elem: '#mytable'
+            ,toolbar:'#toolbar'//开启头部工具栏
+            ,defaultToolbar: ['filter']//开启头部工具栏右侧的图标操作：筛选
+            , url: path+'/law/type/listAll.do' //数据接口
+            , method: 'post'
+            , response: {
+                statusCode: 1 //重新规定成功的状态码为 1，table 组件默认为 0
+            }
+            , parseData: function (res) { //res 即为原始返回的数据
+                return {
+                    "code": res.code, //解析接口状态
+                    "msg": res.msg, //解析提示文本
+                    "count": res.count, //解析数据长度
+                    "data": res.obj //解析数据列表
+                };
+            }
+            , initSort: {field: 'status', type: 'asc'}
+            , cols: [[ //表头
+//                {type:'checkbox'},  //开启复选框
+                {field: 'id', title: 'ID',width:90,  align: 'center'}
+                , {field: 'title', title: '法务类型标题',width:160, align: 'center'}
+                , {field: 'status', title: '数据状态',width:120, align: 'center', templet: "#statusTemp"}
+                , {field: 'create_time', title: '创建时间',width:220, align: 'center', templet: '#createTime'}
+                , {field: 'operation', title: '操作',width:160, toolbar: '#barDemo',align:'center'}   //添加操作
+            ]]
+            , done: function (res, curr, count) {
+                var index=0;//初始化数据下标
+//                $("[data-field='operation']").each(function(){//遍历每个字段为'operation'的行
+//                    //遍历次数为实际长度加一，因此设判断使其等于实际长度
+//                    if(index!=0){
+//                        var data=res.data[index-1];
+////                        console.log(data);
+//                        if(data.status==1){
+//                            var html = '<div class="layui-table-cell laytable-cell-1-0-8 layui-btn-group" align="center">'+
+//                                    '<button type="button" class="layui-btn layui-btn-xs">' +
+//                                    '<a title="下架" style="color:white" onclick="Edit('+data.id +')" href="javascript:;">'+
+//                                    '下架</a>'+
+//                                    '</button>&nbsp;' +
+////                                    '<button type="button" class="layui-btn layui-btn-xs layui-bg-red">' +
+////                                    '<a title="删除" style="color:white" onclick="Delete('+data.id+')" href="javascript:;">'+
+////                                    '删除</a>'+
+////                                    '</button>'+
+//                                    '</div>'
+//                        }else if(data.status==2){
+//                            var html = '<div class="layui-table-cell laytable-cell-1-0-8 layui-btn-group" align="center">'+
+//                                    '<button type="button" class="layui-btn layui-btn-xs">' +
+//                                    '<a title="上架" style="color:white" onclick="Edit('+data.id+')" href="javascript:;">'+
+//                                    '上架</a>'+
+//                                    '</button>&nbsp;' +
+////                                    '<button type="button" class="layui-btn layui-btn-xs layui-bg-red">' +
+////                                    '<a title="删除" style="color:white" onclick="Delete('+data.id+')" href="javascript:;">'+
+////                                    '删除</a>'+
+////                                    '</button>'+
+//                                    '</div>'
+//                        }
+//                        $(this).html(html);
+//                    }
+//                    index++;
+//                });
+            }
+        });
+
+        //监听工具条
+        table.on('tool(mytable)', function(obj){
+            var data = obj.data;
+            if(obj.event === 'changeStatus'){
+                changeStatus(data);
+            }else if(obj.event == 'edit'){
+                edit("类型编辑","law-type-edit.html?id="+data.id+"",400,300);
+            }
+        });
+
+        //编辑功能
+        window.edit=function(title,url,w,h) {
+            layer.open({
+                type: 2,
+                area: [w+'px', h +'px'],
+                fix: true, //不固定
+                maxmin: true,
+                shadeClose: false,
+                shade:0.4,
+                title: title,
+                content: url,
+                end:function () {
+                    var cr=$(".layui-laypage-skip").find("input").val()//获取当前页码
+                    //带页码重载表格
+                    tableResult.reload({
+                        url:path+'/law/type/listAll.do',
+                        method: 'post',
+                        page:{
+                            curr:cr
+                        }
+                    });
+                    return false;
+                }
+            });
+        }
+
+        //改变状态操作
+        function changeStatus(data){
+            $.ajax({
+                url: path+"/law/type/chageStatus.do",
+                type: "POST",
+                data: {"id":data.id},
+                dataType: "json",
+                success: function (data) {
+
+                    if (data == 1) {
+                        layer.msg("操作成功", {icon: 1});
+                        var cur = $(".layui-laypage-em").next().html();//获取当前页
+                        window.location.reload();
+                    } else {
+                        layer.msg("操作失败", {icon: 5});
+                    }
+                }
+
+            });
+        }
+
+        //删除法务
+        window.Delete=function(id) {
+            layer.confirm("确认要删除吗？", {icon: 3, title: "提示"}, function () {
+                $.ajax({
+                    url: path+"/law/type/delete.do",
+                    type: "POST",
+                    data: {"id": id},
+                    dataType: "json",
+                    success: function (data) {
+                        if (data == 1) {
+                            layer.msg("删除成功", {icon: 6});
+                            window.location.reload();
+                        }
+                    }
+                });
+            })
+        }
+    });
+
+</script>
+<!-- 对处理状态进行处理 -->
+<script id="statusTemp" type="text/html">
+    {{#     if(d.status == 1){          }}
+    <span class="layui-btn layui-btn-sm layui-btn-normal">已启用</span>
+    {{#     }else if(d.status == 2){    }}
+    <span class="layui-btn layui-btn-sm layui-btn-disabled">已停用</span>
+    {{#     }                                  }}
+</script>
+<script id="createTime" type="text/html">
+    {{#
+    if (d.create_time!=0){
+    var date = new Date();
+    var createTime = d.create_time+"000";
+    date.setTime(createTime);
+    return date.Format("yyyy-MM-dd hh:mm:ss");
+    }
+    return '没有记录';
+    }}
+</script>
+</body>
+</html>

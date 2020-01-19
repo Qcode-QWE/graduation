@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+    <head>
+        <meta charset="UTF-8">
+        <title>用户信息编辑</title>
+        <meta name="renderer" content="webkit">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+        <link rel="stylesheet" href="../../css/font.css">
+        <link rel="stylesheet" href="../../css/xadmin.css">
+        <script type="text/javascript" src="../../lib/layui/layui.js" charset="utf-8"></script>
+        <script type="text/javascript" src="../../js/xadmin.js"></script>
+        <script type="text/javascript" src="../../js/baseUtils.js"></script>
+        <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+        <!--[if lt IE 9]>
+        <script type="text/javascript" src="../../js/html5shiv.min.js"></script>
+        <script type="text/javascript" src="../../js/respond.js"></script>
+        <![endif]--></head>
+    
+    <body>
+        <div class="layui-fluid">
+            <div class="layui-row">
+                <form class="layui-form" lay-filter="form" id="form">
+                    <div class="layui-form-item">
+                        <label for="status" id="statusName" class="layui-form-label">启用</label>
+                        <div class="layui-input-block">
+                            <input id="status" name="status" type="checkbox" name="status" value="1" lay-skin="switch" lay-filter="status">
+                        </div>
+                        <!--<label for="super" class="layui-form-label" value="1">成为超级管理员</label>
+                        <div class="layui-input-block">
+                            <input id="super" name="super" type="checkbox" name="super" lay-skin="switch" lay-filter="status">
+                        </div>-->
+                    </div>
+                    <div class="layui-form-item" style="display:none">
+                        <label for="id"  class="layui-form-label">ID</label>
+                        <div class="layui-input-block">
+                            <input id="id" name="id" type="text" disabled>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="nickname" class="layui-form-label">
+                            <span class="x-red">*</span>昵称</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="nickname" name="nickname" required="" lay-verify="" autocomplete="off" class="layui-input"></div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label for="realname" class="layui-form-label">
+                            <span class="x-red">*</span>真实姓名</label>
+                        <div class="layui-input-inline">
+                            <input type="text" id="realname" name="realname" required="" lay-verify="" autocomplete="off" class="layui-input"></div>
+                    </div>
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">权限</label>
+                        <div class="layui-input-block" id="authority">
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-submit id="formBut" lay-filter="formBut">保存</button>
+                           <!-- <button class="layui-btn"  lay-filter="reset">重设</button>-->
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script>
+
+            layui.use(['form', 'layer','tree','util'], function() {
+                $ = layui.jquery;
+                var form = layui.form;
+                var layer = layui.layer;
+                var tree = layui.tree;
+                var util = layui.util;
+                var id = GetRequest()['id']; //获取url中"?"符后的字串
+                //异步获取用户数据
+                $.ajax({
+                    url: path+"/admin/"+id+".do",
+                    type:"get",
+                    contentType: 'application/json',
+                    dataType:"json",
+                    success:function (data) {
+                        //回显数据
+                        //console.log(data.data);
+                        var d = data.data;
+                        var admin = d['admin'];
+                        var authorities;
+                        if (d.hasOwnProperty("authorities")){
+                            authorities = d['authorities'];
+                        }
+                        if (data.success){
+                            form.val("form", {
+                                id:admin.id,
+                                nickname:admin.nickname,
+                                realname:admin.realname,
+                                status:admin.status
+                            });
+                            check(admin, authorities);
+                        }else {
+                            $("#form").html("没有该用户!或者服务器出现了一点小问题!");
+                        }
+                    },
+                    error:function (data) {
+                        $("#form").html("<div style='text-align:center'>服务器出现了一点小问题!</div>");
+                    }
+                });
+
+                //对表单数据进行处理
+                function check(admin,authorities) {
+                    //状态
+                    if (admin['status']==1){
+                        $("#status").attr("checked",true);
+                        $("#statusName").text('停用');
+                    }else{
+                        $("#status").attr("checked",false);
+                        $("#statusName").text('启用');
+                    }
+                    var list = $.parseJSON(window.sessionStorage.authorityList);
+                    var html = "";
+                    for (var i in authorities){
+                        var checked = authorities[i].status==1?'checked':'';
+                        html += '<input id="'+authorities[i].id+'" type="checkbox" name="'+list[i].name+'"  title="'+list[i].title+'"  '+checked+' value="1" lay-skin="primary">';
+                    }
+                    $("#authority").html(html);
+                    form.render();
+                }
+                //用户状态改变时,对应的文字改变
+                form.on('switch(status)', function(data){
+                    //开
+                    if (data.elem.checked){
+                        $("#statusName").text('停用');
+                    }else{
+                        $("#statusName").text('启用');
+                    }
+                    form.render();
+                });
+                //监控提交
+                form.on('submit(formBut)', function(data){
+                    //异步提交表单
+                    //对页面数据进行转换,适配后台接口
+                    var field =  data.field;
+                    var admin={};
+                    var authorities=[];
+                    admin.id = field['id'];
+                    admin.nickname = field['nickname'];
+                    admin.realname = field['realname'];
+                    if (field['status']==1){
+                        admin.status = 1;
+                    }else{
+                        admin.status = 2;
+                    }
+                    $("#authority input[type=checkbox]").each(function(i){
+                        var authority = {};
+                        authority.id = $(this).attr('id');
+                        if ($(this).prop("checked")){
+                            authority.status = 1;
+                        }else {
+                            authority.status = 2;
+                        }
+                        authorities.push(authority);
+                    });
+                    admin = JSON.stringify(admin);
+                    authorities = JSON.stringify(authorities);
+                    $.ajax({
+                        url:path+'/admin/edit.do',
+                        method:'post',
+                        traditional: true,
+                        dataType: 'json',
+                        data:{'admin':admin,'authorities':authorities},
+                        success:function (data) {
+                            if (data.success){
+                                message('修改成功',1,layer);
+                            }else{
+                                message('修改失败',2,layer);
+                            }
+                        },
+                        error:function (data) {
+                            message('服务器出了点问题',2,layer);
+                        }
+                    });
+                    return false;
+                });
+                //监控重设
+                form.on('submit(reset)', function(data){
+                    window.location.reload();
+                });
+
+                //获取url参数
+                function GetRequest() {
+                    var url = decodeURI(location.search); //获取url中"?"符后的字串
+                    var theRequest = new Object();
+                    if (url.indexOf("?") != -1) {
+                        var str = url.substr(1);
+                        strs = str.split("&");
+                        for(var i = 0; i < strs.length; i ++) {
+                            theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+                        }
+                    }
+                    return theRequest;
+                }
+            });
+        </script>
+    </body>
+
+</html>

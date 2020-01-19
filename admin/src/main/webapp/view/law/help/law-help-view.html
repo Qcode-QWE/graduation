@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>查看留言记录</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../../../lib/layui/css/layui.css" type="text/css"/>
+    <link rel="stylesheet" href="../../../css/law-help-view.css" type="text/css">
+    <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/baseUtils.js"></script>
+    <script type="text/javascript" src="../../../js/LawUtils.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<style>
+    #myDiv{
+        padding-bottom:150px;
+
+    }
+    #myDiv2{
+        position:fixed;
+        bottom:0px;
+        width:100%;
+        height:150px;
+        background-color: white;
+        z-index:9999;
+    }
+</style>
+
+<body>
+<div style="height: 100%" id="parentDiv">
+
+    <div class="layui-row layui-col-space15" id="myDiv" >
+    </div>
+    <div id="focusBottom"></div>
+    <div id='myDiv2'>
+        <textarea placeholder='请输入回复内容' lay-verify='content' class='layui-textarea' id='myarea'></textarea><br>
+        <div style="text-align: center">
+            <button class="layui-btn" onclick=" Edit()">回复</button>
+        </div>
+    </div>
+
+</div>
+
+<!--处理初始显示位置，使页面一开始就滚动到页尾-->
+<script>
+    //使页面始终focus文本域
+    function focusBottom(){
+        var a=document.getElementById("focusBottom");
+        a.scrollIntoView(true);
+    }
+</script>
+
+<script>
+    <!-- 分页查询 -->
+    //接住所有留言记录
+    var obj;
+    var lastObj;
+    //获取当前管理员信息
+    var admin=$.parseJSON(window.sessionStorage.admin);
+    layui.use(['table', 'form', 'layer', 'jquery','flow'], function () {
+        var form = layui.form;   //只有执行了这一步，部分表单元素才会自动修饰成功
+        var layer = layui.layer;
+        var flow = layui.flow;
+        $ = layui.jquery;
+        form.render();       //手动渲染
+
+        //获取url参数
+        function GetRequest() {
+            var url = decodeURI(location.search); //获取url中"?"符后的字串
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                for(var i = 0; i < strs.length; i ++) {
+                    theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);
+                }
+            }
+            return theRequest;
+        }
+        //获取tag  留言的类型
+        var tag = GetRequest()['tag'];
+        //获取pid  留言记录父id
+        var pid = GetRequest()['pid'];
+        //获取id
+        var id=GetRequest()['id'];
+        //获取uid
+        var uid=GetRequest()['uid'];
+        var reply_mark=GetRequest()['reply_mark'];
+        var currentPage = 1;
+        var pageSize = 15;
+        var height = 0;
+        getLawHelp();
+        //当滚动条到达顶部时,刷新
+        $(window).scroll(function(event){
+            //滚动条距离顶部的距离
+            var oTop = document.body.scrollTop==0?document.documentElement.scrollTop:document.body.scrollTop;
+            //console.log(oTop);
+            if (oTop == 0 && currentPage!=1&& currentPage!=-1){
+                //ajax请求后台
+                getLawHelp();
+            }
+        });
+        //自定义验证规则
+        form.verify({
+            content: function (value) {
+                var text = $("#myarea").val();
+                if (text == '') {
+                    return "正文不能为空";
+                }
+            }
+        });
+
+        function getLawHelp() {
+            $.ajax({
+                url:'/law/help/search.do',//数据接口,
+                type: "POST",
+                data:{"id":id,"uid":uid,"reply_mark":reply_mark,"tag":tag,"currentPage":currentPage,"pageSize":pageSize},
+                dataType: "json",
+                success: function(data){
+                    if (!data.success){
+                        message('服务器出现异常!',2,layer);
+                        return;
+                    }
+                    //接住所有留言记录
+                    obj=data.data.list;
+                    if (currentPage==1){
+                        lastObj=data.data.list[0];
+                    }
+                    var total = data.data.total;
+                    for(var i in obj){   //遍历数据
+                        //接住每条留言记录
+                        var inform=obj[i];
+                        //对时间格式进行处理
+                        var create_time=inform.create_time;
+                        var time=Time(create_time);
+                        //如果是普通用户
+                        if(inform.from_mark==1){
+                            $("#myDiv").prepend("<div class='chat1'><div align='left'><h3>"+inform.from_user_name+"&nbsp;&nbsp;&nbsp;"+time+"</h3></div><div style=' white-space:normal;word-break:break-all; word-wrap:break-word;'><br>"+inform.content+"</div> </div>");
+                        }else{//如果是管理员
+                            $("#myDiv").prepend("<div class='chat1 chat2'><div align='right'><h3>"+inform.from_user_name+"&nbsp;&nbsp;&nbsp;"+time+"</h3></div><div style=' white-space:normal;word-break:break-all; word-wrap:break-word;'><br>"+inform.content+"</div> </div>");
+                        }
+                    }
+                    if(currentPage==1){
+                        focusBottom();
+                        height = $(document).height();
+                    }else{
+                        var h = $(document).height();
+                        $(window).scrollTop(h-height);
+                        height = h;
+                        //console.log("----------0"+""+topL0);
+                    }
+                    if (currentPage < total){
+                        currentPage = currentPage+1;
+                    }else{
+                        currentPage = -1;
+                    }
+                }
+
+            });
+        }
+
+
+        window.Edit=function() {
+            var value=$("#myarea").val();
+            var data=lastObj;//返回留言记录最后一条，用于后台更新等操作
+            console.log(data.id);
+            if (value == '') {
+                layer.msg("回复内容不能为空", {icon: 2});
+            }else{
+                $.ajax({
+                    url: "/law/help/edit.do",
+                    type: "POST",
+                    data:{"id":data.id,"tag":data.tag,"content":value,"pid":data.pid,"to_user_id":data.uid
+                        ,"from_user_id":admin.id,"uid":data.uid},
+                    dataType: "json",
+                    success: function(data){
+                        if(data.success){
+                            //获取当前时间并格式化
+                            var time=new Date();
+                            var now=time.Format("yyyy-MM-dd hh:mm:ss");
+                            //js动态添加新的留言记录，替代页面刷新获取数据
+                            $("#myDiv").append("<div class='chat1 chat2'><div align='right'><h3>"+admin.realname+"&nbsp;&nbsp;&nbsp;"+now+"</h3></div><div style=' white-space:normal;word-break:break-all; word-wrap:break-word;'><br>"+value+"</div> </div>");
+                            //每次回复一次留言成功，清空文本框
+                            $("#myarea").val("");
+                            //将新生成的留言记录放入obj
+                            lastObj=data.data;666
+                            //使页面始终focus文本域
+                            focusBottom();
+                        }else{
+                            layer.msg("留言失败", {icon: 5});
+                        }
+                    }
+                });
+            }
+        };
+
+
+        function Time(create_time){  //时间转换
+            if(create_time!=0){
+                var date = new Date();
+                var createTime = create_time+"000";
+                date.setTime(createTime);
+                return date.Format("yyyy-MM-dd hh:mm:ss");
+            }else{
+                return '没有记录';
+            }
+        }
+
+
+    });
+
+</script>
+
+
+</body>
+</html>

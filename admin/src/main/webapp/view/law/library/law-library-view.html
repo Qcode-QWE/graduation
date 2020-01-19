@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../../lib/layui/css/layui.css" type="text/css"/>
+    <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
+    <script type="text/javascript" src="../../../js/baseUtils.js"></script>
+    <title>详细内容显示</title>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../../js/respond.js"></script>
+    <![endif]-->
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body id="body">
+<div class="layui-fluid">
+    <div class="layui-row">
+        <table class="layui-table" lay-even="" lay-skin="row">
+            <tbody>
+            <tr>
+                <td class="layui-bg-cyan" align="center">法务标题</td>
+            </tr>
+            <tr>
+                <td id="title" align="center"></td>
+            </tr>
+            <tr>
+                <td class="layui-bg-cyan" align="center">法务内容</td>
+            </tr>
+            <tr id="content">
+                <!--<td><div id="contents" align="center"></div></td>-->
+            </tr>
+            <tr>
+                    <div class="layui-form-item">
+                        <a id="a" style="display: none"><span id="downFile"/></a>
+                        <button class="layui-btn" id="but">返回</button>
+                    </div>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="contents" align="center"></div>
+</div>
+
+<script>
+    layui.use(['form', 'layer', 'layedit'], function () {
+        $ = layui.jquery;
+        var form = layui.form;
+        var layer = layui.layer;
+        var layedit = layui.layedit;
+        //点击返回
+        $('#but').click(function () {
+            var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+            parent.layer.close(index); //再执行关闭
+        });
+    });
+
+    //获取传递过来的数据，及绑定到当前页面元素中
+    function mydata(data){
+        var title=data.title;
+        var content=data.content;
+        $("#title").html(title);
+        $("#contents").html(content);
+    }
+</script>
+</body>
+</html>

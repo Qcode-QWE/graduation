@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>新闻类型</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../../css/font.css">
+    <link rel="stylesheet" href="../../css/xadmin.css">
+    <script src="../../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../js/xadmin.js"></script>
+    <script type="text/javascript" src="../../js/baseUtils.js"></script>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../js/respond.js"></script> <![endif]-->
+</head>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body layui-table-body layui-table-main">
+                        <table class="layui-table" id="table"  lay-filter="table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+
+<script>
+    layui.use(['table','jquery'], function(){
+        var table = layui.table;
+        $ = layui.jquery;
+
+        //初始化表单
+        var tableResult=table.render({
+            elem: '#table'
+            ,id:'tables'
+            ,toolbar:'#toolbar'//开启头部工具栏
+            ,defaultToolbar: ['filter']//开启头部工具栏右侧的图标操作：筛选
+            ,url: path+'/news/type/listAll.do' //数据查询接口
+            ,limits:[15,30,40]//每页条数的选择项
+            ,limit:15//默认每页显示条数
+            ,method:'post'
+            ,request: {
+                pageName: 'currentPage' //当前页
+                ,limitName: 'pageSize' //每页数据量的参数名
+            }
+            ,response: {
+                statusCode: 1 //规定成功的状态码，默认：0
+            }
+            ,parseData: function(res){ //解析返回的数据,res 即为原始返回的数据
+                return {
+                    "code": res.success, //解析接口状态
+                    "msg": res.errorMsg, //解析提示文本
+                    "count": res.data.total, //解析数据长度
+                    "data": res.data.list //解析数据列表
+                };
+            }
+            ,loading:true//显示加载条
+            ,page: true //开启分页
+            ,cols: [[ //表头
+                ,{field: 'id',title: 'id',width:80,align:'center'}
+                ,{field: 'title', title: '类型名称',width:150,align:'center'}
+                ,{field: 'status',title: '状态',width:150,templet:"#statusTemp",align:'center'}
+                ,{field: 'create_time', title: '创建时间',width:220,templet:'#createTime',align:'center'}
+                ,{title: '操作',width:150,toolbar:'#operationBar',align:'center'}
+            ]]
+        });
+
+        //行工具栏点击事件
+        table.on('tool(table)', function(obj){
+            var data = obj.data;
+            if(obj.event == 'changeStatus'){
+                changeStatus(data.id,data.status);
+            }else if(obj.event == 'edit'){
+                edit("类型编辑","newsType-edit.html?id="+data.id+"",400,200);
+            }
+        });
+
+        //添加功能
+        window.addNews_type=function(title,url,w,h){
+            layer.open({
+                type: 2,
+                area: [w+'px', h +'px'],
+                fix: true, //不固定
+                maxmin: true,
+                shadeClose: false,
+                shade:0.4,
+                title: title,
+                content: url,
+                end:function () {
+                    var cr=$(".layui-laypage-skip").find("input").val()//获取当前页码
+                    //带页码重载表格
+                    tableResult.reload({
+                        url:path+'/news/type/listAll.do',
+                        method: 'post',
+                        page:{
+                            curr:cr
+                        }
+                    });
+                    return false;
+                }
+            });
+        }
+
+        //编辑功能
+        window.edit=function(title,url,w,h) {
+            layer.open({
+                type: 2,
+                area: [w+'px', h +'px'],
+                fix: true, //不固定
+                maxmin: true,
+                shadeClose: false,
+                shade:0.4,
+                title: title,
+                content: url,
+                end:function () {
+                    var cr=$(".layui-laypage-skip").find("input").val()//获取当前页码
+                    //带页码重载表格
+                    tableResult.reload({
+                        url:path+'/news/type/listAll.do',
+                        method: 'post',
+                        page:{
+                            curr:cr
+                        }
+                    });
+                    return false;
+                }
+            });
+        }
+
+        //改变状态
+        window.changeStatus=function(id,status){
+            // 获得id及status值并改变status值
+            console.log(status);
+            if(status==1)
+                status=2;
+            else
+                status=1;
+            $.ajax({
+                url:path+'/news/type/changeStatus.do',
+                method:'post',
+                data:{'id':id,'status':status},
+                dataType:'JSON',
+                success:function (data) {
+                    if (data.success){
+                        var cr=$(".layui-laypage-skip").find("input").val()//获取当前页码
+                        //带页码重载表格
+                        tableResult.reload({
+                            url:path+'/news/type/listAll.do',
+                            method: 'post',
+                            page:{
+                                curr:cr
+                            }
+                        });
+                    }else{
+                        layer.msg('更新状态失败', {icon: 2,time:1000});
+                    }
+                },
+                error:function (data) {
+                    layer.msg('服务器出现了点问题!',{icon:5,time:1000});
+                }
+            });
+        }
+    });
+
+</script>
+
+
+<script id="createTime" type="text/html">
+    {{#
+    var date = new Date();
+    var createTime = d.create_time+"000";
+    date.setTime(createTime);
+    return date.Format("yyyy-MM-dd hh:mm:ss");
+    }}
+</script>
+
+<!--定义头工具栏按钮-->
+<script type="text/html" id="toolbar">
+    <button class="layui-btn layui-btn-sm" onclick="addNews_type('添加新闻类型','newsType-add.html',400,200)"><i class="layui-icon"></i>添加</button>
+</script>
+
+<!-- 对状态进行处理 -->
+<script id="statusTemp" type="text/html">
+    {{#     if(d.status == 1){          }}
+    <span class="layui-btn layui-btn-sm layui-btn-normal">已启用</span>
+    {{#     }else if(d.status == 2){    }}
+    <span class="layui-btn layui-btn-sm layui-btn-disabled">已停用</span>
+    {{#     }                                   }}
+</script>
+
+<!--定义表格行的操作列的按钮-->
+<script type="text/html" id="operationBar">
+    <a lay-event="edit" href="javascript:;" style="margin-right: 10px"><i class="layui-icon" >&#xe642;</i>编辑</a>
+    {{# if(d.status==1){    }}
+    <a lay-event="changeStatus" style="color: #c2c2c2" href="javascript:;"><i class="layui-icon">&#x1007;</i>停用</a>
+    {{# }else if(d.status==2){  }}
+    <a lay-event="changeStatus" href="javascript:;"><i class="layui-icon">&#x1005;</i>启用</a>
+    {{# }   }}
+</script>
+</html>

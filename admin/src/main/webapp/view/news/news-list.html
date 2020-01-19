@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html class="x-admin-sm">
+<head>
+    <meta charset="UTF-8">
+    <title>新闻列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../../css/font.css">
+    <link rel="stylesheet" href="../../css/xadmin.css">
+    <script src="../../lib/layui/layui.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../js/xadmin.js"></script>
+    <script type="text/javascript" src="../../js/baseUtils.js"></script>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../js/respond.js"></script><![endif]-->
+</head>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body ">
+                        <form class="layui-form layui-col-space5">
+                            <div class="layui-inline layui-show-xs-block">
+                                <input type="text" name="keyword" id="keyword"  placeholder="请输入新闻标题" autocomplete="off" class="layui-input">
+                            </div>
+                            <div class="layui-inline layui-show-xs-block">
+                                <button class="layui-btn"  lay-submit="" lay-filter="search" id="search"><i class="layui-icon">&#xe615;</i></button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="layui-card-body layui-table-body layui-table-main">
+                        <table class="layui-table" id="table"  lay-filter="table"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+
+
+
+<script>
+    layui.use(['table','form','layer','jquery','laytpl'], function(){
+        var table = layui.table;
+        var form = layui.form;
+        var laytpl = layui.laytpl;
+        $ = layui.jquery;
+        var exportData;//用于接住需要导出的表格数据
+
+        //初始化表单
+        var tableResult=table.render({
+            elem: '#table'
+            ,id:'tables'
+            ,title: '新闻基础信息表'
+            ,toolbar:'#toolbar'//开启头部工具栏
+            ,defaultToolbar: ['filter']//开启头部工具栏右侧的图标操作：筛选
+            ,url: path+'/news/list.do' //数据查询接口
+            ,limits:[15,20,30,40]//每页条数的选择项
+            ,limit:15//默认每页显示条数
+            ,method:'post'
+            ,request: {
+                pageName: 'currentPage' //当前页
+                ,limitName: 'pageSize' //每页数据量的参数名
+            }
+            ,response: {
+                statusCode: 1 //规定成功的状态码，默认：0
+            }
+            ,parseData: function(res){ //解析返回的数据,res 即为原始返回的数据
+                var data=[];//初始化返回数据
+                var newsInfos=res.data.news.list;//得到所有新闻信息
+                var newsTypes=res.data.news_type;
+                //遍历新闻
+                for(var i in newsInfos){
+                    var newsInfo=newsInfos[i];//得到一条新闻信息
+                    var newsType=newsTypes[newsInfo.news_type_id];//得到新闻信息对应的类型的信息
+                    if(null != newsType){
+                        type={"type":newsType.title,"newsTypeId":newsType.id};
+                    }
+                    $.extend(newsInfo, type);//对象合并
+                    data.push(newsInfo);
+                }
+                return {
+                    "code": res.success, //解析接口状态
+                    "msg": res.errorMsg, //解析提示文本
+                    "count": res.data.news.total, //解析数据长度
+                    "data": data //解析数据列表
+                };
+            }
+            ,loading:true//显示加载条
+            ,page: true //开启分页
+            ,cols: [[ //表头
+                {type:'checkbox',width:50}
+                ,{field: 'id',title: 'id',width:80,align:'center'}
+                ,{field: 'title', title: '新闻标题',width:200,align:'center'}
+                ,{field: 'brief', title: '内容摘要',width:200,align:'center'}
+                ,{field: 'type', title: '类型',width:160,align:'center'}
+                ,{field: 'read', title: '阅读人数',width:140,align:'center'}
+                ,{field: 'like', title: '点赞人数',width:140,align:'center'}
+                ,{field: 'author', title: '作者',width:150,align:'center'}
+                ,{field: 'status',title: '状态',width:150,align:'center',templet:"#statusTemp"}
+                ,{field: 'create_time', title: '发布时间',width:200,templet:'#createTime',align:'center'}
+                ,{title: '操作',width:250,toolbar:'#operationBar',align:'center'}
+            ]]
+            ,done: function(res, curr, count){//数据渲染完的回调
+                exportData=res.data;//接住表格数据，用于导出表格
+            }
+        });
+
+        //行工具栏点击事件
+        table.on('tool(table)', function(obj){
+            var data = obj.data;
+            if(obj.event == 'edit'){
+                edit("编辑新闻","news-edit.html?id="+data.id+"&newsTypeId="+data.newsTypeId+"",800,500);
+            } else if(obj.event == 'preview'){
+                preview("预览新闻","news-showNews.html?id="+data.id+"",900,500);
+            }
+            // else if(obj.event == 'delete'){
+            //     deleteNews(data.id);
+            // }
+            else if(obj.event == 'changeStatus'){
+                changeStatus(data.id,data.status);
+            }
+        });
+
+        //监听条件查询点击事件
+        form.on('submit(search)', function(data){
+            //当前容器的全部表单字段，名值对形式：{name: value}
+            var keyword =data.field['keyword'];
+            tableResult.reload({
+                url:path+'/news/list.do',
+                method: 'post',
+                where:{
+                    keyword:keyword
+                },
+                page:{
+                    curr:1
+                }
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+        });
+
+        //批量下架
+        window.delAll=function(){
+            //获取复选框选中行的数据
+            var data = layui.table.checkStatus('tables').data;
+            //如果没有选中数据，提示选中
+            if(data.length==0){
+                layer.msg('请选择一行');
+                return;
+            }
+            //封装获取选中的id
+            var ids=[];
+            for (var i=0;i<data.length;i++){
+                if(data[i].status==2){
+                    layer.msg('下架失败,包含已下架新闻', {time:2000});
+                    return;
+                }
+                ids.push(data[i].id);
+            }
+            //创建询问框
+            layer.confirm("确认要下架吗？",{icon:3,title:"提示"},function () {
+                $.ajax({
+                    url:path+'/news/deleteNews.do',
+                    method:'post',
+                    data:{'ids':ids},
+                    traditional: true,//传数组时需设为ture
+                    dataType:'JSON',
+                    success:function (data) {
+                        if (data.success){
+                            layer.msg('下架成功', {icon: 1,time:1000});
+                            var keyword=$("#keyword").val();//获取关键字内容
+                            //带关键字重载表格
+                            tableResult.reload({
+                                url:path+'/news/list.do',
+                                method: 'post',
+                                where:{
+                                    keyword:keyword
+                                },
+                                page:{
+                                    curr:1
+                                }
+                            });
+                        }else{
+                            layer.msg('下架失败', {icon: 2,time:1000});
+                        }
+                    },
+                    error:function (data) {
+                        layer.msg('服务器出现了点问题!',{icon:5,time:1000});
+                    }
+                });
+            })
+        }
+
+        //批量发布
+        window.publishAll=function(){
+            //获取复选框选中行的数据
+            var data = layui.table.checkStatus('tables').data;
+            //如果没有选中数据，提示选中
+            if(data.length==0){
+                layer.msg('请选择一行');
+                return;
+            }
+            //封装获取选中的id
+            var ids=[];
+            for (var i=0;i<data.length;i++){
+                if(data[i].status==1){
+                    layer.msg('发布失败,包含已发布新闻', {time:2000});
+                    return;
+                }
+                ids.push(data[i].id);
+            }
+            //创建询问框
+            layer.confirm("确认要发布吗？",{icon:3,title:"提示"},function () {
+                $.ajax({
+                    url:path+'/news/publishNews.do',
+                    method:'post',
+                    data:{'ids':ids},
+                    traditional: true,//传数组时需设为ture
+                    dataType:'JSON',
+                    success:function (data) {
+                        if (data.success){
+                            layer.msg('发布成功', {icon: 1,time:1000});
+                            var keyword=$("#keyword").val();//获取关键字内容
+                            //带关键字重载表格
+                            tableResult.reload({
+                                url:path+'/news/list.do',
+                                method: 'post',
+                                where:{
+                                    keyword:keyword
+                                },
+                                page:{
+                                    curr:1
+                                }
+                            });
+                        }else{
+                            layer.msg('发布失败', {icon: 2,time:1000});
+                        }
+                    },
+                    error:function (data) {
+                        layer.msg('服务器出现了点问题!',{icon:5,time:1000});
+                    }
+                });
+            })
+        }
+
+        //导出Excel表
+        $("#export").click(function(){
+            table.exportFile(tableResult.config.id,exportData, 'xls');
+        })
+
+        //编辑功能
+        window.edit=function(title,url,w,h) {
+            layer.open({
+                type: 2,
+                area: [w+'px', h +'px'],
+                fix: true, //不固定
+                maxmin: true,
+                shadeClose: false,
+                shade:0.4,
+                title: title,
+                content: url,
+                end:function () {
+                    var cr=$(".layui-laypage-skip").find("input").val()//获取当前页码
+                    var keyword=$("#keyword").val();//获取关键字内容
+                    //带关键字及页码重载表格
+                    tableResult.reload({
+                        url:path+'/news/list.do',
+                        method: 'post',
+                        where:{
+                            keyword:keyword
+                        },
+                        page:{
+                            curr:cr
+                        }
+                    });
+                    return false;
+                }
+            });
+        }
+
+        //预览功能
+        window.preview=function(title,url,w,h) {
+            layer.open({
+                type: 2,
+                area: [w+'px', h +'px'],
+                fix: true, //不固定
+                maxmin: true,
+                shadeClose: true,
+                shade:0.4,
+                title: title,
+                content: url
+            });
+        }
+
+        //改变状态
+        window.changeStatus=function(id,status){
+            // 获得id及status值并改变status值
+            console.log(status);
+            if(status==1)
+                status=2;
+            else
+                status=1;
+            $.ajax({
+                url:path+'/news/changeStatus.do',
+                method:'post',
+                data:{'id':id,'status':status},
+                dataType:'JSON',
+                success:function (data) {
+                    if (data.success){
+                        var cr=$(".layui-laypage-skip").find("input").val()//获取当前页码
+                        var keyword=$("#keyword").val();//获取关键字内容
+                        //带关键字及页码重载表格
+                        tableResult.reload({
+                            url:path+'/news/list.do',
+                            method: 'post',
+                            where:{
+                                keyword:keyword
+                            },
+                            page:{
+                                curr:cr
+                            }
+                        });
+                    }else{
+                        layer.msg('更新状态失败', {icon: 2,time:1000});
+                    }
+                },
+                error:function (data) {
+                    layer.msg('服务器出现了点问题!',{icon:5,time:1000});
+                }
+            });
+        }
+    });
+
+</script>
+<script id="createTime" type="text/html">
+    {{#
+    var date = new Date();
+    var createTime = d.create_time+"000";
+    date.setTime(createTime);
+    return date.Format("yyyy-MM-dd hh:mm:ss");
+    }}
+</script>
+
+<!-- 对状态进行处理 -->
+<script id="statusTemp" type="text/html">
+    {{#     if(d.status == 1){          }}
+    <button class="layui-btn layui-btn-sm">已发布</button>
+    {{#     }else if(d.status == 2){    }}
+    <button class="layui-btn layui-btn-danger layui-btn-sm">已下架</button>
+    {{#     }                                   }}
+</script>
+
+<!--定义头工具栏按钮-->
+<script type="text/html" id="toolbar">
+    <button class="layui-btn layui-btn-danger" onclick="delAll()"><i class="layui-icon"></i>批量下架</button>
+    <button class="layui-btn" onclick="publishAll()"><i class="layui-icon">&#xe609;</i>批量发布</button>
+    <button class="layui-btn" onclick="xadmin.open('添加新闻','news-add.html',800,500)"><i class="layui-icon"></i>添加</button>
+    <!--<button class="layui-btn" id="export"><i class="layui-icon layui-icon-export"></i>导出</button>
+--></script>
+
+<!--定义表格行的操作列的按钮-->
+<script type="text/html" id="operationBar">
+    <button class="layui-btn layui-btn-primary" lay-event="edit">编辑</button>
+    <button class="layui-btn layui-btn-primary" lay-event="preview">预览</button>
+<!--        <button type="button" class="layui-btn layui-btn-primary">-->
+<!--            <a title="删除" href="javascript:;" lay-event="delete">删除</a>-->
+<!--        </button>-->
+    {{# if(d.status==1){    }}
+        <button type="button" class="layui-btn layui-btn-primary " style="background-color: #c2c2c2" lay-event="changeStatus">下架</button>
+    {{# }else if(d.status==2){  }}
+        <button type="button" class="layui-btn layui-btn-primary" lay-event="changeStatus">发布</button>
+    {{# }   }}
+</script>
+</html>
