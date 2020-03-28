@@ -32,7 +32,6 @@ import java.util.zip.ZipOutputStream;
  **/
 @Component
 public class FileUtil {
-
     //本机网络地址
     private static  String webPATH;
     //根目录  D:/java
