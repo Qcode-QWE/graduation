@@ -55,6 +55,12 @@
         <servlet-name>springMVC</servlet-name>
     </filter-mapping>
 
+    <!--指定欢迎页面-->
+    <welcome-file-list>
+        <welcome-file>view/index.html</welcome-file>
+    </welcome-file-list>
+
+
     <!-- 跨域问题解决 -->
     <filter>
         <filter-name>header</filter-name>
