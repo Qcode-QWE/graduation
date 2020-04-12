@@ -5,17 +5,25 @@ import lombok.Setter;
 import lombok.ToString;
 
 //结果封装类
-@Getter @ToString
+@Getter
+@ToString
 @Setter
-public class JSONResult{
+public class JSONResult {
 
-    private  boolean success = true;
+    private boolean success = true;
 
     private Object data;
     private String errorMsg;
 
-    public  void mark(String errorMsg){
+    public void mark(String errorMsg) {
         this.success = false;
         this.errorMsg = errorMsg;
+    }
+
+    public static JSONResult success(Object data) {
+        JSONResult jsonResult = new JSONResult();
+        jsonResult.setData(data);
+        jsonResult.setSuccess(true);
+        return jsonResult;
     }
 }
