@@ -2,8 +2,9 @@ package cn.hwsoft.wisdom.core.mapper;
 
 import cn.hwsoft.wisdom.core.domain.Inspect_type;
 import cn.hwsoft.wisdom.core.domain.Inspect_typeExample;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 public interface Inspect_typeMapper {
     long countByExample(Inspect_typeExample example);

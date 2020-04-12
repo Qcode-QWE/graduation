@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.hwsoft.wisdom.core.mapper.Law_help_video_logMapper">
+
+
+    <insert id="create" useGeneratedKeys="true" keyProperty="id"
+            parameterType="cn.hwsoft.wisdom.core.domain.Law_help_video_log">
+        insert into law_help_video_log
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="room != null">
+                room,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="question != null">
+                question,
+            </if>
+            <if test="userId != null">
+                uid,
+            </if>
+            <if test="adminId != null">
+                pid,
+            </if>
+            <if test="userName != null">
+                user_name,
+            </if>
+            <if test="adminName != null">
+                admin_name,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="content != null">
+                content,
+            </if>
+            <if test="replyMark != null">
+                reply_mark,
+            </if>
+            <if test="status != null">
+                status,
+            </if>
+            <if test="tag != null">
+                tag,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="room != null">
+                #{room},
+            </if>
+            <if test="title != null">
+                #{title},
+            </if>
+            <if test="question != null">
+                #{question},
+            </if>
+            <if test="userId != null">
+                #{userId},
+            </if>
+            <if test="adminId != null">
+                #{adminId},
+            </if>
+            <if test="userName != null">
+                #{userName},
+            </if>
+            <if test="adminName != null">
+                #{adminName},
+            </if>
+            <if test="url != null">
+                #{url},
+            </if>
+            <if test="content != null">
+                #{content},
+            </if>
+            <if test="replyMark != null">
+                #{reply_mark},
+            </if>
+            <if test="status != null">
+                #{reply_mark},
+            </if>
+            <if test="tag != null">
+                #{tag},
+            </if>
+            <if test="createTime != null">
+                #{create_time},
+            </if>
+        </trim>
+    </insert>
+    <update id="update">
+        update law_help_video_log set
+        <trim suffixOverrides=",">
+            <if test="room != null">
+                room = #{room},
+            </if>
+            <if test="title != null">
+                title = #{title},
+            </if>
+            <if test="question != null">
+                question = #{question},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="adminId != null">
+                admin_id=#(adminId),
+            </if>
+            <if test="userName != null">
+                user_name = #{userName},
+            </if>
+            <if test="adminName != null">
+                admin_name = #{adminName},
+            </if>
+            <if test="url != null">
+                url = #{url},
+            </if>
+            <if test="content != null">
+                content = #{content},
+            </if>
+            <if test="replyMark != null">
+                reply_mark = #{replyMark},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="tag != null">
+                tag = #{tag},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+        </trim>
+    </update>
+    <delete id="delete">
+        delete from law_help_video_log
+        where id = #{id}
+    </delete>
+    <select id="findById" resultType="cn.hwsoft.wisdom.core.domain.Law_help_video_log">
+        select * from law_help_video_log where id = #{id}
+    </select>
+    <select id="findAll" resultType="cn.hwsoft.wisdom.core.domain.Law_help_video_log">
+        select * from law_help_video_log
+    </select>
+</mapper>
