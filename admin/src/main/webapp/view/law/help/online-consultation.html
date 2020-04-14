@@ -6,7 +6,7 @@
     <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
     <script type="text/javascript" src="../../../js/baseUtils.js"></script>
     <script type="text/javascript" src="../../../js/LawUtils.js"></script>
-    <title>法律咨询</title>
+    <title>在线咨询</title>
     <!--[if lt IE 9]>
     <script type="text/javascript" src="../../../js/html5shiv.min.js"></script>
     <script type="text/javascript" src="../../../js/respond.js"></script>
@@ -60,7 +60,7 @@
             elem: '#mytable'
             , url: path+'/law/help/list.do' //数据接口
             , method: 'get'
-            , where: {tag: 1}
+            , where: {tag: 3}
             , response: {
                 statusCode: 1 //重新规定成功的状态码为 1，table 组件默认为 0
             }
@@ -98,7 +98,7 @@
                 , {field: 'reply_mark', title: '留言状态', width: 150,align:'center'}
                 , {field: 'from_mark', title: '来源', width: 160,align:'center'}
                 , {field: 'create_time', title: '创建时间', width: 220,align:'center',templet:'#createTime'}
-                ,{field:'operation',title:'操作',width: 200,toolbar: '#barDemo',align:'center'}   //添加操作
+                ,{field:'operation',title:'操作',width: 200,toolbar: '#barDemo',align:'center'}
             ]]
             ,done: function(res, curr, count){
                 //如果是异步请求数据方式，res即为你接口返回的信息。
@@ -108,6 +108,11 @@
 //                console.log(curr);
                 //得到数据总量
 //                console.log(count);
+                $("[data-field='userName']").children().each(function(){
+                    if($(this).text()==""){
+                        $(this).text("管理员");
+                    }
+                });
                 $("[data-field='from_mark']").children().each(function(){
                     if($(this).text()=='1'){
                         $(this).text("普通用户");
@@ -139,7 +144,7 @@
             var uid=data.uid;
             var reply_mark=data.reply_mark;
             if(obj.event === 'detail'){
-                toolWindow("查看留言记录","law-help-view.html?tag=1&id="+id+"&uid="+uid+"&reply_mark="+reply_mark+"",1,tableResult);
+                toolWindow("查看留言记录","law-help-view.html?tag=3&id="+id+"&uid="+uid+"&reply_mark="+reply_mark+"",3,tableResult);
             } else
             if(obj.event === 'del'){
                 layer.confirm('真的删除么', function(index){
@@ -194,6 +199,7 @@
 //                            uv: value
 //                        });
                         layer.msg("留言成功", {icon: 1});
+
                         var cur = $(".layui-laypage-em").next().html();//获取当前页
                         window.location.reload();
                     }else{
@@ -210,7 +216,7 @@
             console.log(data.value); ////得到被选中的值
             var reply_mark=data.value;
             tableResult.reload({
-                url:path+'/law/help/list.do?tag=1',
+                url:path+'/law/help/list.do?tag=3',
                 method: 'get',
                 where:{
                     reply_mark:reply_mark,

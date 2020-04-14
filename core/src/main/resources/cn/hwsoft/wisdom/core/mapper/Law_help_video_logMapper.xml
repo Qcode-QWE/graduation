@@ -82,16 +82,16 @@
                 #{content},
             </if>
             <if test="replyMark != null">
-                #{reply_mark},
+                #{replyMark},
             </if>
             <if test="status != null">
-                #{reply_mark},
+                #{status},
             </if>
             <if test="tag != null">
                 #{tag},
             </if>
             <if test="createTime != null">
-                #{create_time},
+                #{createTime},
             </if>
         </trim>
     </insert>
