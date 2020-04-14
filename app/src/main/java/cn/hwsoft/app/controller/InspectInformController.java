@@ -2,14 +2,20 @@ package cn.hwsoft.app.controller;
 
 
 import cn.hwsoft.app.utils.UploadUtil;
+import cn.hwsoft.wisdom.core.domain.Admin;
 import cn.hwsoft.wisdom.core.domain.Inspect_inform;
 import cn.hwsoft.wisdom.core.domain.Inspect_type;
+import cn.hwsoft.wisdom.core.domain.User;
 import cn.hwsoft.wisdom.core.query.JSONResult;
+import cn.hwsoft.wisdom.core.query.QueryObject;
+import cn.hwsoft.wisdom.core.service.AdminService;
 import cn.hwsoft.wisdom.core.service.InspectInformService;
 import cn.hwsoft.wisdom.core.service.InspectTypeService;
+import cn.hwsoft.wisdom.core.service.UserService;
 import cn.hwsoft.wisdom.core.utils.BaseUtils;
 import cn.hwsoft.wisdom.core.utils.IpUtils;
 import cn.hwsoft.wisdom.core.utils.TimeUtils;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 军检举报Controller
@@ -31,7 +38,49 @@ public class InspectInformController {
     private InspectInformService informService;
     @Autowired
     private InspectTypeService typeService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private AdminService adminService;
 
+    /**
+     * 获取军检举报列表(分页,带条件)
+     * @param qo
+     * @return
+     */
+    @PostMapping("/list")
+    @ResponseBody
+    public JSONResult list(QueryObject qo){
+        JSONResult result = new JSONResult();
+        PageInfo<Inspect_inform> pageInfo = informService.list(qo);
+        List<Inspect_inform> list = pageInfo.getList();
+        //查询控告对应的user,type和处理的admin
+        Map<Integer, User> userMap =  new HashMap<>();
+        Map<Integer, Admin> adminMap =  new HashMap<>();
+        Map<Integer,Inspect_type> typeMap = new HashMap<>();
+        for(Inspect_inform inform:list){
+            User user = userService.selectUser(inform.getUser_id());
+            Integer id = inform.getAdmin_id();
+            Admin admin = null;
+            if(id!=null && id!=0){
+                admin = adminService.selectAdmin(id);
+            }
+            Integer typeID = inform.getType_id();
+            Inspect_type type = null;
+            if(typeID!=null && typeID!=0){
+               type = typeService.selectById(typeID);
+            }
+            userMap.put(inform.getId(),user);
+            adminMap.put(inform.getId(),admin);
+            typeMap.put(inform.getId(),type);
+        }
+        Map<String,Object> map = new HashMap<>();
+        map.put("informs",pageInfo);
+        map.put("adminMap",adminMap);
+        map.put("typeMap",typeMap);
+        result.setData(map);
+        return result;
+    }
 
     /**
      * 保存军检举报
