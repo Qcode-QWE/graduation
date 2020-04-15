@@ -2,15 +2,18 @@ package cn.hwsoft.app.controller;
 
 import cn.hwsoft.wisdom.core.domain.News;
 import cn.hwsoft.wisdom.core.domain.News_detail;
+import cn.hwsoft.wisdom.core.domain.News_type;
 import cn.hwsoft.wisdom.core.query.JSONResult;
 import cn.hwsoft.wisdom.core.query.QueryObject;
 import cn.hwsoft.wisdom.core.service.NewsService;
+import cn.hwsoft.wisdom.core.service.NewsTypeService;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,6 +27,8 @@ import java.util.Map;
 public class NewsController {
     @Autowired
     private NewsService newsService;
+    @Autowired
+    private NewsTypeService newsTypeService;
 
     /**
      * 新闻页面首页的新闻列表
@@ -47,9 +52,26 @@ public class NewsController {
     @PostMapping("/Page")
     @ResponseBody
     public JSONResult selectNewsPage(/*@ModelAttribute("qo") */QueryObject qo){
+        //分页查询新闻信息
         PageInfo<News> info = newsService.getNewsPage(qo);
+        //获取新闻信息列表
+        List<News> list = info.getList();
+        Map<Integer, News_type> newsTypeMap=new HashMap<>();
+        //遍历list
+        for (News news : list) {
+            //根据id获取新闻类型信息
+            News_type newsType = newsTypeService.getNewsTypeById(news.getNews_type_id());
+            //将记录存进HashMap
+            newsTypeMap.put(news.getNews_type_id(),newsType);
+        }
+        //封装数据
+        Map<String,Object> resultMap = new HashMap<>();
+        //将新闻信息存进结果集
+        resultMap.put("news",info);
+        //将新闻类型信息存进结果集
+        resultMap.put("news_type",newsTypeMap);
         JSONResult result = new JSONResult();
-        result.setData(info);
+        result.setData(resultMap);
         return result;
     }
 
