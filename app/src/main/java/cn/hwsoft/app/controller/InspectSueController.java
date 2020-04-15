@@ -1,22 +1,26 @@
 package cn.hwsoft.app.controller;
 
 import cn.hwsoft.app.utils.UploadUtil;
+import cn.hwsoft.wisdom.core.domain.Admin;
 import cn.hwsoft.wisdom.core.domain.Inspect_sue;
 import cn.hwsoft.wisdom.core.domain.Inspect_type;
+import cn.hwsoft.wisdom.core.domain.User;
 import cn.hwsoft.wisdom.core.query.JSONResult;
+import cn.hwsoft.wisdom.core.query.QueryObject;
+import cn.hwsoft.wisdom.core.service.AdminService;
 import cn.hwsoft.wisdom.core.service.InspectSueService;
 import cn.hwsoft.wisdom.core.service.InspectTypeService;
+import cn.hwsoft.wisdom.core.service.UserService;
 import cn.hwsoft.wisdom.core.utils.BaseUtils;
 import cn.hwsoft.wisdom.core.utils.IpUtils;
 import cn.hwsoft.wisdom.core.utils.TimeUtils;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  * @program: parent
@@ -28,9 +32,45 @@ import java.util.List;
 @Controller
 public class InspectSueController {
     @Autowired
-    private InspectSueService inspectSueService;
+    private InspectSueService sueService;
     @Autowired
     private InspectTypeService typeService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private AdminService adminService;
+
+    /**
+     * 获取军检举报列表(分页,带条件)
+     * @param qo
+     * @return
+     */
+    @PostMapping("/list")
+    @ResponseBody
+    public JSONResult list(QueryObject qo){
+        JSONResult result = new JSONResult();
+        PageInfo<Inspect_sue> pageInfo = sueService.list(qo);
+        List<Inspect_sue> list = pageInfo.getList();
+        List<Object> viewList = new ArrayList<>();
+        //查询控告对应的user和处理的admin
+        for(Inspect_sue sue:list){
+            Integer id = sue.getAdmin_id();
+            Admin admin = null;
+            if(id!=null && id!=0){
+                admin = adminService.selectAdmin(id);
+            }
+            Integer typeID = sue.getType_id();
+            Inspect_type type = null;
+            if(typeID!=null && typeID!=0){
+                type = typeService.selectById(typeID);
+            }
+            InspectView view = new InspectView(sue,type,admin,2);
+            viewList.add(view);
+        }
+        result.setData(new PageView(viewList,pageInfo.getTotal()));
+        return result;
+    }
+
     /**
      *  保存举报信息
      * @param inspectSue
@@ -53,7 +93,7 @@ public class InspectSueController {
         inspectSue.setSmall_proof(paths.get(0));
         inspectSue.setProof(paths.get(1));
         //保存
-        inspectSueService.save(inspectSue);
+        sueService.save(inspectSue);
         JSONResult result = new JSONResult();
         result.setData(receipt);
         return result;
@@ -82,15 +122,14 @@ public class InspectSueController {
     @ResponseBody
     public JSONResult selectById(@PathVariable("id") int id){
         JSONResult result = new JSONResult();
-        Inspect_sue sue = inspectSueService.selectById(id);
+        Inspect_sue sue = sueService.selectById(id);
         Inspect_type type = null;
+        Admin admin = null;
         if(sue !=null){
             type = typeService.selectById(sue.getType_id());
+            admin = adminService.selectAdmin(sue.getAdmin_id());
         }
-        HashMap<String,Object> map = new HashMap<>();
-        map.put("sue",sue);
-        map.put("type",type);
-        result.setData(map);
+        result.setData(new InspectView(sue,type,admin,1));
         return result;
     }
 

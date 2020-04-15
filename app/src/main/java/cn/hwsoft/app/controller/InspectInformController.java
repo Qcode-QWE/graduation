@@ -21,10 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 军检举报Controller
@@ -54,12 +51,9 @@ public class InspectInformController {
         JSONResult result = new JSONResult();
         PageInfo<Inspect_inform> pageInfo = informService.list(qo);
         List<Inspect_inform> list = pageInfo.getList();
+        List<Object> viewList = new ArrayList<>();
         //查询控告对应的user,type和处理的admin
-        Map<Integer, User> userMap =  new HashMap<>();
-        Map<Integer, Admin> adminMap =  new HashMap<>();
-        Map<Integer,Inspect_type> typeMap = new HashMap<>();
         for(Inspect_inform inform:list){
-            User user = userService.selectUser(inform.getUser_id());
             Integer id = inform.getAdmin_id();
             Admin admin = null;
             if(id!=null && id!=0){
@@ -70,15 +64,10 @@ public class InspectInformController {
             if(typeID!=null && typeID!=0){
                type = typeService.selectById(typeID);
             }
-            userMap.put(inform.getId(),user);
-            adminMap.put(inform.getId(),admin);
-            typeMap.put(inform.getId(),type);
+            InspectView view = new InspectView(inform,type,admin,1);
+            viewList.add(view);
         }
-        Map<String,Object> map = new HashMap<>();
-        map.put("informs",pageInfo);
-        map.put("adminMap",adminMap);
-        map.put("typeMap",typeMap);
-        result.setData(map);
+        result.setData(new PageView(viewList,pageInfo.getTotal()));
         return result;
     }
 
@@ -123,13 +112,12 @@ public class InspectInformController {
         JSONResult result = new JSONResult();
         Inspect_inform inform = informService.selectById(id);
         Inspect_type type = null;
+        Admin admin = null;
         if(inform!=null){
             type = typeService.selectById(inform.getType_id());
+            admin = adminService.selectAdmin(inform.getAdmin_id());
         }
-        HashMap<String,Object> map = new HashMap<>();
-        map.put("inform",inform);
-        map.put("type",type);
-        result.setData(map);
+        result.setData(new InspectView(inform,type,admin,1));
         return result;
     }
     /**
@@ -146,4 +134,32 @@ public class InspectInformController {
     }
 
 
+}
+
+class InspectView {
+    public Object data;
+    public Inspect_type type;
+    public Admin admin;
+    public int dataType;
+
+    public InspectView(){}
+
+    public InspectView(Object data, Inspect_type type, Admin admin,int dataType) {
+        this.data = data;
+        this.type = type;
+        this.admin = admin;
+        this.dataType = dataType;
+    }
+}
+
+class PageView {
+    public List<Object> list;
+    public long total;
+
+    public PageView(){}
+
+    public PageView(List<Object> list, long total) {
+        this.list = list;
+        this.total = total;
+    }
 }
