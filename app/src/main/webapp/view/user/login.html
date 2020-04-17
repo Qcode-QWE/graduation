@@ -28,7 +28,7 @@
               <div class="layui-form-item">
                 <label for="L_email" class="layui-form-label">身份证号</label>
                 <div class="layui-input-inline">
-                  <input type="text" id="L_email" name="identity" required lay-verify="identity" autocomplete="off" class="layui-input">
+                  <input type="text" id="L_email" name="identity" required lay-verify="" autocomplete="off" class="layui-input">
                 </div>
               </div>
               <div class="layui-form-item">
@@ -68,34 +68,43 @@
 
 <script src="../../res/layui/layui.js"></script>
 <script>
-  layui.use('form', function(){
-    var form = layui.form;
-    form.on('submit(submit)', function(data){
 
-    console.log(data);
-    var field = data.field;
-    var identity = field.identity;
-    var pass = field.pass;
-    var vercode = field.vercode;
+
+  layui.use(['form','layer'], function(){
+    var form = layui.form;
+    var layer = layui.layer;
+
+    //如果已经登录了,必须先退出
+    //判断是否已经登录
+    var u,hasLogin = checkLogin();
+    if( hasLogin) {
+      layer.msg("您已经登录!",{icon:1},function () {
+        location.href=path+'/view/index.html';
+      });
+    }
+
+    // 登录
+    form.on('submit(submit)', function(data){
+    var field = data.field, identity = field.identity,pass = field.pass,vercode = field.vercode;
     $.ajax({
-      //请求方式
-      type : "POST",
-      //请求地址
-      url : path+'/user/login.do',
-      //数据，json字符串
+      type : "POST", url : path+'/user/login.do',
       data : {
         identity:identity,
         password:pass
       },
       datatype:"json",
-      //请求成功
       success : function(res) {
-        console.log(res);
-        var list =res.data['list'];
-        total =res.data.total;
-        drawTpl(list,index);
-        if (isFirst){
-          SetPage(pageID,total);
+        var success = res.success;
+        var msg = res.errorMsg;
+        if (!success){
+          layer.msg(msg,{icon:1});
+        }else{
+          layer.msg("登陆成功!",{icon:1},function () {
+            location.href=path+'/view/index.html';
+          });
+          var user = JSON.stringify(res.data);
+          console.log(user);
+          setCookie("user",user,30);
         }
       },
       //请求失败，包含具体的错误信息

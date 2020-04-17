@@ -25,29 +25,29 @@
           <div class="layui-form layui-form-pane">
             <form method="post">
               <div class="layui-form-item">
-                <label for="L_email" class="layui-form-label">邮箱</label>
+                <label for="L_email" class="layui-form-label">身份证号</label>
                 <div class="layui-input-inline">
-                  <input type="text" id="L_email" name="email" required lay-verify="email" autocomplete="off" class="layui-input">
+                  <input type="text" id="L_email" name="identity" required lay-verify="" autocomplete="off" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux">将会成为您唯一的登入名</div>
               </div>
               <div class="layui-form-item">
-                <label for="L_username" class="layui-form-label">昵称</label>
+                <label for="L_username" class="layui-form-label">姓名</label>
                 <div class="layui-input-inline">
-                  <input type="text" id="L_username" name="username" required lay-verify="required" autocomplete="off" class="layui-input">
+                  <input type="text" id="L_username" name="nickname" required lay-verify="required" autocomplete="off" class="layui-input">
                 </div>
               </div>
               <div class="layui-form-item">
                 <label for="L_pass" class="layui-form-label">密码</label>
                 <div class="layui-input-inline">
-                  <input type="password" id="L_pass" name="pass" required lay-verify="required" autocomplete="off" class="layui-input">
+                  <input type="password" id="L_pass" name="pass" required lay-verify="required|pass" autocomplete="off" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux">6到16个字符</div>
               </div>
               <div class="layui-form-item">
                 <label for="L_repass" class="layui-form-label">确认密码</label>
                 <div class="layui-input-inline">
-                  <input type="password" id="L_repass" name="repass" required lay-verify="required" autocomplete="off" class="layui-input">
+                  <input type="password" id="L_repass" name="repass" required lay-verify="required|confirmPass" autocomplete="off" class="layui-input">
                 </div>
               </div>
               <div class="layui-form-item">
@@ -60,7 +60,7 @@
                 </div>
               </div>
               <div class="layui-form-item">
-                <button class="layui-btn" lay-filter="*" lay-submit>立即注册</button>
+                <button class="layui-btn" lay-filter="submit" lay-submit>立即注册</button>
               </div>
             </form>
           </div>
@@ -79,6 +79,70 @@
 
 <script src="../../res/layui/layui.js"></script>
 
+
+<script>
+
+
+  layui.use(['form','layer'], function(){
+    var form = layui.form;
+    var layer = layui.layer;
+
+    //如果已经登录了,必须先退出
+    //判断是否已经登录
+    var u,hasLogin = checkLogin();
+    if( hasLogin) {
+      layer.msg("您已经登录!",{icon:1},function () {
+        location.href=path+'/view/index.html';
+      });
+    }
+
+    // 登录
+    form.on('submit(submit)', function(data){
+      var field = data.field, identity = field.identity,pass = field.pass,nickname = field.nickname,vercode = field.vercode;
+      $.ajax({
+        type : "POST", url : path+'/user/register.do',
+        data : {
+          identity:identity,
+          nickname:nickname,
+          password:pass
+        },
+        datatype:"json",
+        success : function(res) {
+          console.log(res);
+          var success = res.success;
+          var msg = res.errorMsg;
+          if (!success){
+            layer.msg(msg,{icon:1});
+          }else{
+            layer.msg("注册成功!",{icon:1},function () {
+              location.href=path+'/view/user/login.html';
+            });
+          }
+        },
+        //请求失败，包含具体的错误信息
+        error : function(res){
+
+        }
+      });
+      return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
+    });
+
+
+    form.verify({
+      pass: [
+      /^[\S]{6,12}$/
+      ,'密码必须6到12位，且不能出现空格'
+    ],
+    confirmPass:function(value){
+      console.log(value);
+      if($('#L_pass').val() !== value)
+        return '两次密码输入不一致！';
+    }
+  })
+
+
+  });
+</script>
 
 </body>
 </html>
