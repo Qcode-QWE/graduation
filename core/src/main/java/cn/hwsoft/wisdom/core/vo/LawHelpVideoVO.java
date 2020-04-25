@@ -1,15 +1,17 @@
-package cn.hwsoft.wisdom.core.domain;
+package cn.hwsoft.wisdom.core.vo;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
-import java.util.Date;
+/**
+ * @author chenjinpeng
+ * @date 2020/04/23 09:02:11
+ * @description 描述信息
+ */
+@Data
+@Accessors(chain = true)
+public class LawHelpVideoVO{
 
-@ToString
-@Getter
-@Setter
-public class Law_help_video_log {
     private Integer id;
 
     private String room;
@@ -36,7 +38,5 @@ public class Law_help_video_log {
 
     private Integer tag;
 
-    private Long createTime;
-
-    private String createAt;
+    private Integer createTime;
 }

@@ -7,7 +7,7 @@ var btnLeave= document.querySelector('button#leave');
 
 var localStream = null;
 
-var roomid = '111111';
+var roomid = null;
 var socket = null;
 
 var state = 'init';
@@ -160,8 +160,9 @@ function start(){
     }
 }
 
-function connSignalServer(){
-    alert("chong");
+function connSignalServer(roomid){
+    this.roomid = roomid;
+    alert("chong"+roomid);
     start();
     return true;
 }

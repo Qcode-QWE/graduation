@@ -77,29 +77,31 @@
                     </div>
                 </div>
 
-                <div class="layui-col-md2">
-                    <div class="layui-form-item">
-                        <button class="layui-btn" lay-submit id="connserver" lay-filter="connserver">Connect Sig
-                            Server
-                        </button>
-                        <button class="layui-btn" lay-submit id="leave" lay-filter="leave" disabled>Leave</button>
-                    </div>
-                </div>
-                <div class="layui-form-item">
-                    <div class="layui-col-md5">
-                        <h2>Local:</h2>
-                        <video id="localvideo" autoplay playsinline></video>
-                    </div>
-                </div>
 
-                <div class="layui-form-item">
-                    <div class="layui-col-md5">
-                        <h2>Remote:</h2>
-                        <video id="remotevideo" autoplay playsinline></video>
-                    </div>
-                </div>
 
             </form>
+
+            <div class="layui-col-md2">
+                <div class="layui-form-item">
+                    <button class="layui-btn" lay-submit id="connserver" lay-filter="connserver" lay-filter="connserver">Connect Sig
+                        Server
+                    </button>
+                    <button class="layui-btn" lay-submit id="leave" lay-filter="leave" disabled>Leave</button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md5">
+                    <h2>Local:</h2>
+                    <video id="localvideo" autoplay playsinline></video>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-col-md5">
+                    <h2>Remote:</h2>
+                    <video id="remotevideo" autoplay playsinline></video>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -123,8 +125,11 @@
 
 <script>
     //Demo
-    layui.use('form', function () {
-        var form = layui.form;
+    layui.use(['form', 'layer','tree','util'], function() {
+        $ = layui.jquery;
+        var form = layui.form, layer = layui.layer;
+        var tree = layui.tree;
+        var util = layui.util;
 
         //监听提交
         form.on('submit(formDemo)', function (data) {
@@ -138,24 +143,33 @@
                 data: {"request": JSON.stringify(request)},
                 dataType: "json",
                 success: function (data) {
-
-                    if (data == 1) {
-                        //关闭弹框
-                        layer.close(index);
-                        //同步更新表格和缓存对应的值
-//                        obj.update({
-//                            uv: value
-//                        });
-                        layer.msg("留言成功", {icon: 1});
-
-                        var cur = $(".layui-laypage-em").next().html();//获取当前页
-                        window.location.reload();
+                    if (data.success) {
+                        message('新增成功', 1, layer);
                     } else {
-                        layer.msg("修改失败", {icon: 5});
+                        message('新增失败', 2, layer);
                     }
                 }
             });
         });
+
+        //监听connect
+        form.on('submit(connserver)', function (data) {
+            alert("go");
+            $.ajax({
+                url: path + "/law/help/video/getRoomByUserId.do",
+                type: "POST",
+                data: {"userId": 10001},
+                dataType: "json",
+                success: function (data) {
+                    if (data.success) {
+                        connSignalServer(data.data.room);
+                    } else {
+                        alert("fail");
+                    }
+                }
+            });
+        });
+
     });
 </script>
 </body>

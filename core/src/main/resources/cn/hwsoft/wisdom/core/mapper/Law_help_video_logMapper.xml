@@ -20,7 +20,7 @@
                 question,
             </if>
             <if test="userId != null">
-                uid,
+                user_id,
             </if>
             <if test="adminId != null">
                 pid,
@@ -148,5 +148,55 @@
     </select>
     <select id="findAll" resultType="cn.hwsoft.wisdom.core.domain.Law_help_video_log">
         select * from law_help_video_log
+    </select>
+    <select id="getRoomByUserId" resultType="cn.hwsoft.wisdom.core.domain.Law_help_video_log">
+        select * from law_help_video_log
+        where user_id = #{userId}
+        order by create_time desc
+        limit 1
+    </select>
+    <select id="selectCount" resultType="java.lang.Integer">
+        SELECT count(*) from law_help_video_log
+        <where>
+            <if test="tag != 0">
+                and tag=#{tag}
+            </if>
+            <if test="reply_mark != 0">
+                and reply_mark=#{reply_mark}
+            </if>
+            <if test="reply_mark != 0">
+                and reply_mark=#{reply_mark}
+            </if>
+            <if test="keyword!=null and keyword!=''">
+                and (
+                `title` like concat('%',#{keyword},'%')
+                or `question` like concat('%',#{keyword},'%')
+                or `user_name` like concat('%',#{keyword},'%')
+                or `admin_name` like concat('%',#{keyword},'%')
+                )
+            </if>
+        </where>
+    </select>
+    <select id="list" resultType="cn.hwsoft.wisdom.core.domain.Law_help_video_log">
+        SELECT * from law_help_video_log
+        <where>
+            <if test="query.tag != 0">
+                and tag=#{query.tag}
+            </if>
+            <if test="query.reply_mark != 0">
+                and reply_mark=#{query.reply_mark}
+            </if>
+            <if test="query.reply_mark != 0">
+                and reply_mark=#{query.reply_mark}
+            </if>
+            <if test="query.keyword!=null and query.keyword!=''">
+                and (
+                `title` like concat('%',#{query.keyword},'%')
+                or `question` like concat('%',#{query.keyword},'%')
+                or `user_name` like concat('%',#{query.keyword},'%')
+                or `admin_name` like concat('%',#{query.keyword},'%')
+                )
+            </if>
+        </where>
     </select>
 </mapper>

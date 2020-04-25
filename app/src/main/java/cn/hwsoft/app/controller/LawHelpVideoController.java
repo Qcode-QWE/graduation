@@ -50,5 +50,9 @@ public class LawHelpVideoController {
         return JSONResult.success(b);
     }
 
-
+    @PostMapping("/getRoomByUserId")
+    public JSONResult getRoomByUserId(Integer userId){
+        Law_help_video_log room  = lawHelpVideoService.getRoomByUserId(userId);
+        return JSONResult.success(room);
+    }
 }

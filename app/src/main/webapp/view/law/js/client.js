@@ -7,7 +7,7 @@ var btnLeave= document.querySelector('button#leave');
 
 var localStream = null;
 
-var roomid = '111111';
+var roomid = null;
 var socket = null;
 
 var state = 'init';
@@ -125,7 +125,7 @@ function conn(){
         }
     });
 
-    socket.emit('join','111111');
+    socket.emit('join',roomid);
     return ;
 
 }
@@ -160,8 +160,8 @@ function start(){
     }
 }
 
-function connSignalServer(){
-    alert("chong");
+function connSignalServer(room){
+    roomid = room;
     start();
     return true;
 }
@@ -176,7 +176,7 @@ function closeLocalMedia(){
 }
 function leave(){
     if(socket){
-        socket.emit('leave','111111');
+        socket.emit('leave',roomid);
     }
     closePeerConnection();
     closeLocalMedia();
@@ -226,5 +226,4 @@ function closePeerConnection(){
         pc = null;
     }
 }
-btnConn.onclick = connSignalServer
 btnLeave.onclick = leave;
