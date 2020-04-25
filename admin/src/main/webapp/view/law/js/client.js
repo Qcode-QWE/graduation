@@ -125,7 +125,7 @@ function conn(){
         }
     });
 
-    socket.emit('join','111111');
+    socket.emit('join',roomid);
     return ;
 
 }
@@ -160,9 +160,8 @@ function start(){
     }
 }
 
-function connSignalServer(roomid){
-    this.roomid = roomid;
-    alert("chong"+roomid);
+function connSignalServer(room){
+    roomid = room;
     start();
     return true;
 }
@@ -177,7 +176,7 @@ function closeLocalMedia(){
 }
 function leave(){
     if(socket){
-        socket.emit('leave','111111');
+        socket.emit('leave',roomid);
     }
     closePeerConnection();
     closeLocalMedia();
@@ -227,5 +226,4 @@ function closePeerConnection(){
         pc = null;
     }
 }
-btnConn.onclick = connSignalServer
 btnLeave.onclick = leave;

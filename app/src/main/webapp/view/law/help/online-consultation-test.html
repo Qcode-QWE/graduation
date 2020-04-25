@@ -1,21 +1,65 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="../../../lib/layui/css/layui.css" type="text/css"/>
-    <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
-    <script type="text/javascript" src="../../../js/baseUtils.js"></script>
-    <script type="text/javascript" src="../../../js/LawUtils.js"></script>
-    <title>在线咨询</title>
+    <meta charset="utf-8">
+    <title>智慧检查</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../../res/layui/css/layui.css">
+    <link rel="stylesheet" href="../../../res/css/global.css">
+    <script type="text/javascript" src="../../../res/layui/layui.all.js"></script>
+    <script type="text/javascript" src="../../../res/layui/jquery.min.js" charset="utf-8"></script>
+    <script type="text/javascript" src="../../../res/js/baseUtils.js" charset="utf-8"></script>
+
     <!--[if lt IE 9]>
-    <script type="text/javascript" src="../../../js/html5shiv.min.js"></script>
-    <script type="text/javascript" src="../../../js/respond.js"></script>
+    <script type="text/javascript" src="../../../res/js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../../res/js/respond.js"></script>
     <![endif]-->
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <style type="text/css">
+        .time_text {
+            position: absolute;
+            bottom: 0px;
+            padding: 0px;
+            margin: 0px;
+            color: #999;
+        }
+
+        .detail_text {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 7;
+            -webkit-box-orient: vertical;
+            font-size: 15px;
+        }
+
+        .status_1 {
+            font-size: 5px;
+            color: #2D93CA;
+            text-align: center;
+            line-height: 15px;
+        }
+
+        .status_2 {
+            font-size: 5px;
+            color: orange;
+            text-align: center;
+            line-height: 15px;
+        }
+
+        .status_3 {
+            font-size: 5px;
+            color: #FF5722;
+            text-align: center;
+            line-height: 15px;
+        }
+
+    </style>
 </head>
 <body>
+<div id="header"></div>
 <div class="layui-fluid">
     <div class="layui-row layui-col-space15">
         <div class="layui-col-md12">
@@ -29,32 +73,42 @@
         </div>
     </div>
 </div>
+
+<div id="footer"></div>
+<!-- 加载头部和尾部 -->
+
 </body>
+
+
+<script>
+    $("#header").load("../../header.html");
+    $("#footer").load("../../footer.html");
+</script>
+
+
 <script type="text/html" id="barDemo">
     <a class="layui-btn  layui-btn-xs" lay-event="detail">connect</a>
-<!--    <a class="layui-btn  layui-btn-xs" lay-event="detail">查看留言记录</a>-->
-    <!--<a class="layui-btn layui-btn-xs" lay-event="edit">回复</a>-->
-    <!--<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>-->
 </script>
 <script>
     <!--分页查询-->
     layui.use(['table', 'form', 'layer', 'jquery'], function () {
         var table = layui.table;
-        var form = layui.form;   //只有执行了这一步，部分表单元素才会自动修饰成功
         var layer = layui.layer;
         var json = layui.json;
         $ = layui.jquery;
-        form.render();       //手动渲染
+
+
         //第一个实例
         var tableResult = table.render({
             elem: '#mytable'
-            , url: path + '/law/help/video/list.do' //数据接口
+            , url: path+'/law/help/video/list.do' //数据接口
             , method: 'get'
             , where: {tag: 0}
             , response: {
                 statusCode: 1 //重新规定成功的状态码为 1，table 组件默认为 0
             }
             , parseData: function (res) { //res 即为原始返回的数据
+                console.log(res);
                 var itemList = res.data['list'];//留言完整记录
                 return {
                     "code": res.success, //解析接口状态
@@ -115,7 +169,7 @@
             var question = data.question;
             var title = data.title;
             if (obj.event === 'detail') {
-                toolWindow("通讯咨询室", "online-view.html?tag=3&id=" + id + "&room=" + room + "&question="+ question+ "&title=" + title + "", 3, tableResult);
+                toolWindow("通讯咨询室", "online-view.html?tag=3&id=" + id + "&room=" + room + "&question=" + question + "&title=" + title + "", 3, tableResult);
             } else if (obj.event === 'del') {
                 layer.confirm('真的删除么', function (index) {
                     obj.del();
