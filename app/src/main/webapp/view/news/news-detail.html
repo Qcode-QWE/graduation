@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>智慧军检</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <link rel="stylesheet" href="../../res/layui/css/layui.css">
+  <link rel="stylesheet" href="../../res/css/global.css">
+  <script type="text/javascript" src="../../res/layui/jquery.min.js" charset="utf-8"></script>
+  <script type="text/javascript" src="../../res/js/baseUtils.js" charset="utf-8"></script>
+
+  <style type="text/css">
+    #news_detail{
+      min-height: 600px;
+      padding-top:20px;
+      margin-left: 50px;
+      margin-right: 50px;
+      color: #999;
+    }
+    #other_message{
+      position: relative;
+      top: 20px;
+      font-size: 15px;
+    }
+    #other_message span{
+      margin-right: 20px;
+    }
+    #content{
+      margin-top: 20px;
+      font-size: 18px;
+      color: black;
+    }
+    #article_like{
+      position: absolute;
+      margin-left: 50%;
+      bottom: 10px;
+      font-size: 50px;
+      color: black;
+    }
+    #like_number{
+      position: absolute;
+      margin-left: 51%;
+      bottom: 5px;
+      font-size: 10px;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+<div id="header"></div>
+
+<div class="layui-container fly-marginTop">
+  <div class="fly-panel" >
+    <div id="news_detail">
+    </div>
+  </div>
+</div>
+
+<div id="footer"></div>
+
+<!-- 加载头部和尾部 -->
+<script>
+  $("#header").load("../header.html");
+  $("#footer").load("../footer.html");
+</script>
+ 
+<script src="../../res/layui/layui.js"></script>
+
+
+<script>
+  layui.use(['jquery','laytpl','laypage','layer'], function(){
+    var laytpl = layui.laytpl;
+    $ = layui.jquery;
+    var layer = layui.layer;
+
+    //获取id
+    var id = GetRequest()['id'];
+
+    /*查询新闻详细信息*/
+    $.ajax({
+      url: path+"/news/"+id+".do",
+      type:"GET",
+      contentType: 'application/json',
+      dataType:"json",
+      success:function (res) {
+        //回显数据
+        if (res.success){
+          var getTpl = news_detail_tpl.innerHTML
+                  ,view = document.getElementById('news_detail');
+          laytpl(getTpl).render(res.data, function(html){
+            view.innerHTML = html;
+          });
+        }else {
+          layer.msg('预览新闻失败', {icon: 2});
+        }
+      },
+      error:function (data) {
+        layer.msg('服务器出现了点问题', {icon: 5});
+      }
+    });
+
+    /*新闻点赞*/
+    window.like=function (id) {
+      $.ajax({
+        url: path+"/news/like.do",
+        type:"POST",
+        data:{id:id},
+        dataType:"json",
+        success:function (res) {
+          $("#article_like").css("color","red");//修改点赞图标颜色
+          $("#news_detail a").removeAttr("onclick");//去除点赞功能
+          var origValue=$("#like_number").text();//获得点赞次数
+          var newValue = parseInt(origValue) +1;//点赞次数+1
+          $("#like_number").text(newValue);//修改点赞次数
+        }
+      });
+    }
+
+  });
+
+</script>
+
+<!--新闻详细信息模板-->
+<script type="text/html" id="news_detail_tpl">
+  <h1 style="text-align: center;color: #2F4056">{{d.news.title}}</h1><br>
+  <div  id="other_message">
+    <span>
+      {{d.news.author}}<i class="layui-icon" style="color: orange">&#xe770;</i>
+    </span>
+
+    <!--将时间戳格式化-->
+    {{#
+    if (CheckIsNullOrEmpty(d.news.create_time)){
+    var date = new Date();
+    var createTime = d.news.create_time+"000";
+    date.setTime(createTime);
+    var t = date.Format("yyyy-MM-dd hh:mm:ss");
+    }}
+    <span>{{ t }}</span>
+    {{#
+    }else {
+    }}
+    <span>no time</span>
+    {{#
+    }
+    }}
+
+    <span><i class="layui-icon" style="color: #2E2D3C">&#xe705;</i> {{d.news.read}}</span>
+    <hr class="layui-bg-cyan">
+    <div id="content">{{d.news_detail.content}}</div>
+  </div>
+  <a href="javascript:void(0)"  onclick="like({{d.news.id}})"><i class="layui-icon" id="article_like">&#xe6c6;</i></a>
+  <span id="like_number">{{d.news.like}}</span>
+</script>
+
+</body>
+</html>
