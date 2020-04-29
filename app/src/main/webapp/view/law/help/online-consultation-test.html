@@ -142,6 +142,7 @@
                 , {field: 'title', title: '咨询标题', width: 200, align: 'center'}
                 , {field: 'question', title: '咨询内容', width: 200, align: 'center'}
                 , {field: 'tag', title: '咨询类型', width: 150, align: 'center'}
+                , {field: 'adminName', title: '管理员名', width: 120, align: 'center'}
                 , {field: 'status', title: '数据状态', width: 100, align: 'center'}
                 , {field: 'replyMark', title: '留言状态', width: 120, align: 'center'}
                 , {field: 'createAt', title: '创建时间', width: 220, align: 'center'}
@@ -155,9 +156,9 @@
 //                console.log(curr);
                 //得到数据总量
 //                console.log(count);
-                $("[data-field='userName']").children().each(function () {
+                $("[data-field='adminName']").children().each(function () {
                     if ($(this).text() == "") {
-                        $(this).text("管理员");
+                        $(this).text("暂无");
                     }
                 });
                 $("[data-field='status']").children().each(function () {

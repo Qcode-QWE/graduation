@@ -21,6 +21,18 @@
         <div class="layui-col-md12">
             <div class="layui-card">
                 <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                        <div class="layui-inline layui-show-xs-block">
+                            <input type="text" name="keyword" id="keyword" placeholder="请输入关键词" autocomplete="off"
+                                   class="layui-input">
+                        </div>
+                        <div class="layui-inline layui-show-xs-block">
+                            <button class="layui-btn" lay-submit="" lay-filter="search" id="search"><i
+                                    class="layui-icon">&#xe615;</i></button>
+                        </div>
+                    </form>
+                </div>
+                <div class="layui-card-body ">
                     <div class="layui-card-body layui-table-body layui-table-main">
                         <table id="mytable" class="layui-table" lay-filter="mytable"></table>
                     </div>
@@ -70,11 +82,13 @@
 //                {type:'checkbox'},  //开启复选框
                 {field: 'id', title: 'ID', width: 80, sort: true, align: 'center'}
                 , {field: 'room', title: '房间号', width: 200, align: 'center'}
+                , {field: 'userName', title: '用户名', width: 120, align: 'center'}
+                , {field: 'adminName', title: '管理员名', width: 120, align: 'center'}
                 , {field: 'title', title: '咨询标题', width: 200, align: 'center'}
                 , {field: 'question', title: '咨询内容', width: 200, align: 'center'}
-                , {field: 'tag', title: '咨询类型', width: 150, align: 'center'}
-                , {field: 'status', title: '数据状态', width: 150, align: 'center'}
-                , {field: 'replyMark', title: '留言状态', width: 150, align: 'center'}
+                , {field: 'tag', title: '咨询类型', width: 120, align: 'center'}
+                , {field: 'status', title: '数据状态', width: 100, align: 'center'}
+                , {field: 'replyMark', title: '留言状态', width: 120, align: 'center'}
                 , {field: 'createAt', title: '创建时间', width: 220, align: 'center'}
                 , {
                     field: 'operation',
@@ -93,7 +107,12 @@
                 //得到数据总量
                 $("[data-field='userName']").children().each(function () {
                     if ($(this).text() == "") {
-                        $(this).text("管理员");
+                        $(this).text("暂无");
+                    }
+                });
+                $("[data-field='adminName']").children().each(function () {
+                    if ($(this).text() == "") {
+                        $(this).text("暂无");
                     }
                 });
                 $("[data-field='status']").children().each(function () {
@@ -110,11 +129,10 @@
                     } else if ($(this).text() == '2') {
                         $(this).text("已回复");
                         let elm = $(this).parent().next().next().children().children();
-                        console.log(elm);
                         elm[0].setAttribute("disabled", "disabled");
-                        elm[0].style.backgroundColor  = '#555555';
+                        elm[0].style.backgroundColor = '#555555';
                         elm[1].setAttribute("disabled", "disabled");
-                        elm[1].style.backgroundColor  = '#555555';
+                        elm[1].style.backgroundColor = '#555555';
                     }
 
                 });
@@ -128,6 +146,23 @@
                     }
                 });
             }
+        });
+
+        //监听条件查询点击事件
+        form.on('submit(search)', function (data) {
+            // console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+            var keyword = data.field['keyword'];
+            tableResult.reload({
+                url: path + '/law/help/video/list.do', //数据接口
+                method: 'get',
+                where: {
+                    keyword: keyword
+                },
+                page: {
+                    curr: 1
+                }
+            });
+            return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
         });
 
         //监听工具条   回复留言
