@@ -71,15 +71,24 @@
     <div class="layui-form-item">
         <div class="layui-col-md5">
             <h2>Local:</h2>
-            <video id="localvideo" autoplay playsinline></video>
+            <video id="localvideo" width="320" height="240" autoplay playsinline></video>
+        </div>
+        <div class="layui-col-md7">
+            <h2>content:</h2>
+            <textarea disabled id="output" rows="10" cols="50"></textarea>
         </div>
     </div>
 
     <div class="layui-form-item">
         <div class="layui-col-md5">
             <h2>Remote:</h2>
-            <video id="remotevideo" autoplay playsinline></video>
+            <video id="remotevideo" width="320" height="240" autoplay playsinline></video>
         </div>
+        <div class="layui-col-md7">
+            <h2>Input:</h2>
+            <textarea disabled id="input" rows="3" cols="50"></textarea>
+        </div>
+        <button id="send" disabled >Send</button>
     </div>
 </div>
 </div>
@@ -135,7 +144,34 @@
         }
         //监听connect
         form.on('submit(connserver)', function (data) {
-            connSignalServer(room);
+            connSignalServer(room, "管理员");
+        });
+
+        //监听connect
+        form.on('submit(leave)', function (obj) {
+            console.log(obj);
+            let a = $("#output");
+            let value = $("#output")[0].value;
+            console.log(a);
+            var lawHelpMessage = {};
+            lawHelpMessage.content = value;
+            lawHelpMessage.id = id;
+            lawHelpMessage = JSON.stringify(lawHelpMessage);
+            $.ajax({
+                url: path + "/law/help/video/update.do",
+                type: "post",
+                data: {"request": lawHelpMessage},
+                dataType: "json",
+                success: function (data) {
+                    if (data == true) {
+                        layer.msg("咨询内容保存成功", {icon: 6, time: 1000}, function () {
+                            window.location.reload();
+                        });
+                    } else {
+                        layer.msg("咨询内容保存失败", {icon: 6});
+                    }
+                }
+            });
         });
 
     });

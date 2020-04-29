@@ -72,15 +72,24 @@
     <div class="layui-form-item">
         <div class="layui-col-md5">
             <h2>Local:</h2>
-            <video id="localvideo" autoplay playsinline></video>
+            <video id="localvideo" width="320" height="240" autoplay playsinline></video>
+        </div>
+        <div class="layui-col-md7">
+            <h2>content:</h2>
+            <textarea disabled id="output" rows="10" cols="50"></textarea>
         </div>
     </div>
 
     <div class="layui-form-item">
         <div class="layui-col-md5">
             <h2>Remote:</h2>
-            <video id="remotevideo" autoplay playsinline></video>
+            <video id="remotevideo" width="320" height="240" autoplay playsinline></video>
         </div>
+        <div class="layui-col-md7">
+            <h2>Input:</h2>
+            <textarea disabled id="input" rows="3" cols="50"></textarea>
+        </div>
+        <button id="send" disabled>Send</button>
     </div>
 </div>
 
@@ -135,7 +144,7 @@
         }
         //监听connect
         form.on('submit(connserver)', function (data) {
-            connSignalServer(room);
+            connSignalServer(room,"陈小鱼");
         });
 
     });
