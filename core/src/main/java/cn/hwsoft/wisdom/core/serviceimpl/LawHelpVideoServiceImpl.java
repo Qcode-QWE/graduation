@@ -32,8 +32,11 @@ public class LawHelpVideoServiceImpl implements LawHelpVideoService {
 
     @Override
     public boolean updateLawHelpLog(Law_help_video_log lawHelpVideoLog) {
+        Integer update = lawHelpVideoLogMapper.update(lawHelpVideoLog);
+        if (update > 0) {
+            return true;
+        }
         return false;
-
     }
 
     @Override
@@ -45,7 +48,7 @@ public class LawHelpVideoServiceImpl implements LawHelpVideoService {
     public List<Law_help_video_log> list(LawQuery query) {
         List<Law_help_video_log> result = lawHelpVideoLogMapper.list(query);
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        result.forEach(law->{
+        result.forEach(law -> {
             String s = TimeUtils.timeStampToDate(String.valueOf(law.getCreateTime()));
             law.setCreateAt(s);
         });

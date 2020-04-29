@@ -57,3 +57,39 @@ function toolWindowLibray(title,url,w,h,data,end) {
         end:end
     });
 }
+
+function toolWindowForOnline(title,url,tag,tableResult) {
+    layui.layer.open({
+        type: 2,
+        area: ['70%', '90%'],
+        fix: false, //不固定
+        maxmin: true,
+        shadeClose: false,
+        shade:0.4,
+        title: title,
+        content: url,
+        success:function (layero,index) {
+            console.log(layero, index);
+            var iframe = window['layui-layer-iframe' + index];
+        },
+        end:function () {
+            //重载表格
+            console.log("aaa");
+            tableResult.reload({
+                url:path+'/law/help/video/list.do',
+                method: 'get',
+                where:{
+                    tag: tag
+                },
+                page:{
+                    curr:1
+                }
+            });
+            return false;
+        }
+        // , cancel: function(index, layero){
+        //     layer.close(index);
+        //     parent.location.reload();
+        // }
+    });
+}

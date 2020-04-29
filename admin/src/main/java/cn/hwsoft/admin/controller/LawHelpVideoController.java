@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 后台管理：咨询，援助，救助（列表查看，留言回复）
@@ -35,11 +36,13 @@ public class LawHelpVideoController {
         return JSONResult.success(b);
     }
 
-    @PutMapping
-    public JSONResult updateLawHelpLog(String request) {
+    @PostMapping("/update")
+    public boolean updateLawHelpLog(String request) {
         Law_help_video_log lawHelpVideoLog = JSON.parseObject(request, Law_help_video_log.class);
-        boolean b = lawHelpVideoService.updateLawHelpLog(lawHelpVideoLog);
-        return JSONResult.success(b);
+        if (Objects.isNull(lawHelpVideoLog.getId())) {
+            return false;
+        }
+        return lawHelpVideoService.updateLawHelpLog(lawHelpVideoLog);
     }
 
     @GetMapping("/list")  //分页显示

@@ -138,6 +138,7 @@
                 create_time = #{createTime},
             </if>
         </trim>
+        where id =#{id}
     </update>
     <delete id="delete">
         delete from law_help_video_log

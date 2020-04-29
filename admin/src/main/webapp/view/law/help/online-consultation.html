@@ -31,11 +31,11 @@
 </div>
 </body>
 <script type="text/html" id="barDemo">
-    <a class="layui-btn  layui-btn-xs" lay-event="detail">connect</a>
-<!--    <a class="layui-btn  layui-btn-xs" lay-event="detail">查看留言记录</a>-->
-    <!--<a class="layui-btn layui-btn-xs" lay-event="edit">回复</a>-->
-    <!--<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>-->
+    <button class="layui-btn  layui-btn-xs" lay-event="detail" id="connect">connect</button>
+    <button class="layui-btn  layui-btn-xs" lay-event="confirm" id="confirmReply">确认回复</button>
 </script>
+
+
 <script>
     <!--分页查询-->
     layui.use(['table', 'form', 'layer', 'jquery'], function () {
@@ -72,19 +72,25 @@
                 , {field: 'room', title: '房间号', width: 200, align: 'center'}
                 , {field: 'title', title: '咨询标题', width: 200, align: 'center'}
                 , {field: 'question', title: '咨询内容', width: 200, align: 'center'}
+                , {field: 'tag', title: '咨询类型', width: 150, align: 'center'}
                 , {field: 'status', title: '数据状态', width: 150, align: 'center'}
                 , {field: 'replyMark', title: '留言状态', width: 150, align: 'center'}
                 , {field: 'createAt', title: '创建时间', width: 220, align: 'center'}
-                , {field: 'operation', title: '操作', width: 200, toolbar: '#barDemo', align: 'center'}
+                , {
+                    field: 'operation',
+                    title: '操作',
+                    width: 200,
+                    toolbar: '#barDemo',
+                    template: '#stateTpl',
+                    align: 'center'
+                }
             ]]
             , done: function (res, curr, count) {
                 //如果是异步请求数据方式，res即为你接口返回的信息。
                 //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
                 console.log(res);
                 //得到当前页码
-//                console.log(curr);
                 //得到数据总量
-//                console.log(count);
                 $("[data-field='userName']").children().each(function () {
                     if ($(this).text() == "") {
                         $(this).text("管理员");
@@ -100,8 +106,25 @@
                 $("[data-field='replyMark']").children().each(function () {
                     if ($(this).text() == '1') {
                         $(this).html("<p style='color: orange'>待回复</p>");
+
                     } else if ($(this).text() == '2') {
                         $(this).text("已回复");
+                        let elm = $(this).parent().next().next().children().children();
+                        console.log(elm);
+                        elm[0].setAttribute("disabled", "disabled");
+                        elm[0].style.backgroundColor  = '#555555';
+                        elm[1].setAttribute("disabled", "disabled");
+                        elm[1].style.backgroundColor  = '#555555';
+                    }
+
+                });
+                $("[data-field='tag']").children().each(function () {
+                    if ($(this).text() == '1') {
+                        $(this).html("<p style='color: orange'>法律咨询</p>");
+                    } else if ($(this).text() == '2') {
+                        $(this).html("<p style='color: orange'>法律援助</p>");
+                    } else if ($(this).text() == '3') {
+                        $(this).html("<p style='color: orange'>司法救助</p>");
                     }
                 });
             }
@@ -114,28 +137,41 @@
             var room = data.room;
             var question = data.question;
             var title = data.title;
+            var tag = data.tag;
             if (obj.event === 'detail') {
-                toolWindow("通讯咨询室", "online-view.html?tag=3&id=" + id + "&room=" + room + "&question="+ question+ "&title=" + title + "", 3, tableResult);
-            } else if (obj.event === 'del') {
-                layer.confirm('真的删除么', function (index) {
+                toolWindowForOnline("通讯咨询室", "online-view.html?tag=" + tag + "&id=" + id + "&room=" + room + "&question=" + question + "&title=" + title + "", 0, tableResult);
+            } else if (obj.event === 'confirm') {
+                layer.confirm('确认已回复么', function (index) {
                     obj.del();
-                    Delete(data.id, index);
+                    ConfirmReply(id, index);
 //                    layer.close(index);
                 });
-            } else if (obj.event === 'edit') { //编辑留言
-//                layer.alert('编辑行：<br>'+ JSON.stringify(data))
-                layer.prompt({
-                    formType: 2
-                    , title: '回复留言'
-                    , value: ""
-                }, function (value, index) {
-                    //这里一般是发送修改的Ajax请求
-                    Eidt(data, value, index, obj);
-                });
-
             }
         });
 
+        //在线咨询确认回复
+        function ConfirmReply(id, index) {
+            var lawHelpMessage = {};
+            lawHelpMessage.id = id;
+            lawHelpMessage.replyMark = 2;
+            lawHelpMessage = JSON.stringify(lawHelpMessage);
+            $.ajax({
+                url: path + "/law/help/video/update.do",
+                type: "post",
+                data: {"request": lawHelpMessage},
+                dataType: "json",
+                success: function (data) {
+                    if (data == true) {
+                        layer.close(index);
+                        layer.msg("设置成功", {icon: 6, time: 1000}, function () {
+                            window.location.reload();
+                        });
+                    } else {
+                        layer.msg("设置失败", {icon: 6});
+                    }
+                }
+            });
+        }
     });
 </script>
 

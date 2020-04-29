@@ -31,11 +31,14 @@ public class LawHelpVideoController {
 
     @PostMapping
     public JSONResult createLawHelpLog(String request) {
-        if (request != null && StringUtils.isEmpty(request)) {
+        if (StringUtils.isEmpty(request)) {
             return JSONResult.error("title params must not null!");
         }
 
         Law_help_video_log lawHelpVideoLog = JSON.parseObject(request, Law_help_video_log.class);
+        if(StringUtils.isEmpty(lawHelpVideoLog.getTitle())){
+            return JSONResult.error("title params must not null!");
+        }
         /**
          * todo 获取当前用户id，name
          */
@@ -60,6 +63,9 @@ public class LawHelpVideoController {
 
     @GetMapping("/list")  //分页显示
     public JSONResult list(LawQuery query) {
+        /**
+         * todo 获取当前用户id，name
+         */
         PageHelper.startPage(query.getPage(), query.getLimit());
         List<Law_help_video_log> lawHelpVideoLogs = lawHelpVideoService.list(query);
         PageInfo<Law_help_video_log> pageInfo = new PageInfo<>(lawHelpVideoLogs);

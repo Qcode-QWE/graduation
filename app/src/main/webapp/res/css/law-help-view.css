@@ -1,0 +1,52 @@
+html, body {
+    background: white;
+    color: #222;
+    font-family: "fangsong";
+    font-size: 16px;
+    height: 101%;
+}
+
+h3 {font-family: Fantasy ;}
+
+img {
+    display: block;
+    height: 10%;
+    width: 50%;
+}
+
+.chat {
+    width: 500px;
+    height: 500px;
+    margin: 0 auto;
+    padding: 20px 20px;
+    background: #cdb79e;
+
+}
+
+.chat1 {
+    /*border:2px solid #303030;*/
+    border-radius: 20px; /*向div元素添加圆角边框，数值定义圆角的形状*/
+    box-sizing: border-box; /*允许以特定的方式定义匹配某个区域的特定元素*/
+    float: left;
+    clear: both;
+    margin-bottom: 5px;
+    padding: 20px 30px;
+    background: #E8E8E8;
+    position: relative;
+    width: 600px;
+}
+
+.chat2 {
+    background: #aeeeee;
+    float: right;
+}
+
+.chat3 {
+    position: relative;
+    border: 2px solid #303030;
+    border-radius: 5px;
+    top: 470px;
+    width: 100%;
+    padding: 5px 0px;
+    text-align: left;
+}

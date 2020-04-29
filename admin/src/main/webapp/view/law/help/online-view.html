@@ -5,7 +5,8 @@
     <title>查看留言记录</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <meta name="viewport"
+          content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi"/>
     <link rel="stylesheet" href="../../../lib/layui/css/layui.css" type="text/css"/>
     <link rel="stylesheet" href="../../../css/law-help-view.css" type="text/css">
     <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
@@ -21,45 +22,67 @@
 <body>
 
 <div id="header"></div>
+<div class="layui-form">
+    <table class="layui-table">
+        <colgroup>
+            <col width="150">
+            <col width="150">
+            <col width="200">
+            <col>
+        </colgroup>
+        <thead>
+        <tr>
+            <th>房间号</th>
+            <th>咨询标题</th>
+            <th>咨询类型</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td id="room"></td>
+            <td id="title"></td>
+            <td id="tag"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="layui-container">
+    <div class="layui-col-md9">
+        <label><h2 style="color: #009E94">咨询内容：</h2></label>
+        <div class="layui-form-item" id="question"
+             style="white-space:normal; word-break:break-all; word-wrap:break-word; ">
 
-<div class="layui-container fly-marginTop">
-    <div class="fly-panel fly-panel-user" pad20>
-        <div class="layui-tab layui-tab-brief" lay-filter="user">
-            <div class="layui-form-item">
-                <label class="layui-form-label">咨询标题</label>
-                <div class="layui-input-block" id="title">
-                </div>
-            </div>
-            <div class="layui-form-item layui-form-text">
-                <label class="layui-form-label">咨询内容</label>
-                <div class="layui-input-block" id="question">
-                </div>
-            </div>
+        </div>
+    </div>
 
-            <div class="layui-col-md2">
-                <div class="layui-form-item">
-                    <button class="layui-btn" lay-submit id="connserver" lay-filter="connserver"
-                            lay-filter="connserver">Connect Sig
-                        Server
-                    </button>
-                    <button class="layui-btn" lay-submit id="leave" lay-filter="leave" disabled>Leave</button>
-                </div>
+    <div class="layui-form-item">
+        <div class="layui-row">
+            <div class="layui-col-md3">
+                <button class="layui-btn" lay-submit id="connserver" lay-filter="connserver"
+                        lay-filter="connserver">Connect Sig Server
+                </button>
             </div>
-            <div class="layui-form-item">
-                <div class="layui-col-md5">
-                    <h2>Local:</h2>
-                    <video id="localvideo" autoplay playsinline></video>
-                </div>
-            </div>
-
-            <div class="layui-form-item">
-                <div class="layui-col-md5">
-                    <h2>Remote:</h2>
-                    <video id="remotevideo" autoplay playsinline></video>
-                </div>
+            <div class="layui-col-md3">
+                <button class="layui-btn layui-input-block" lay-submit id="leave" lay-filter="leave" disabled>Leave
+                </button>
             </div>
         </div>
     </div>
+    <div class="layui-form-item">
+        <div class="layui-col-md5">
+            <h2>Local:</h2>
+            <video id="localvideo" autoplay playsinline></video>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <div class="layui-col-md5">
+            <h2>Remote:</h2>
+            <video id="remotevideo" autoplay playsinline></video>
+        </div>
+    </div>
+</div>
+</div>
 
 </div>
 
@@ -98,8 +121,18 @@
         var question = GetRequest()['question'];
         //获取uid
         var title = GetRequest()['title'];
+        //获取uid
+        var tag = GetRequest()['tag'];
         document.getElementById('title').innerHTML = title;
+        document.getElementById('room').innerHTML = room;
         document.getElementById('question').innerHTML = question;
+        if (tag == 1) {
+            document.getElementById('tag').innerHTML = "法律咨询";
+        } else if (tag == 2) {
+            document.getElementById('tag').innerHTML = "法律援助";
+        } else if (tag == 3) {
+            document.getElementById('tag').innerHTML = "司法救助";
+        }
         //监听connect
         form.on('submit(connserver)', function (data) {
             connSignalServer(room);
