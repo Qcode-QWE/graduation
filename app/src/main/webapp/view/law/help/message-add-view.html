@@ -74,6 +74,7 @@
         });
         //监控提交
         form.on('submit(formBut)', function (data) {
+            $('#formBut').attr('disabled', 'disabled');
             //异步提交表单
             var field = data.field;
             var lawHelpMessage = {};
@@ -93,10 +94,12 @@
                         message('新增成功', 1, layer);
                     } else {
                         message('新增失败', 2, layer);
+                        $('#formBut').removeAttr('disabled');
                     }
                 },
                 error: function (data) {
                     message('服务器出了点问题', 2, layer);
+                    $('#formBut').removeAttr('disabled');
                 }
             });
             return false;
