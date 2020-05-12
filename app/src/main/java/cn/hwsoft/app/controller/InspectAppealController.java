@@ -1,22 +1,26 @@
 package cn.hwsoft.app.controller;
 
 import cn.hwsoft.app.utils.UploadUtil;
+import cn.hwsoft.wisdom.core.domain.Admin;
 import cn.hwsoft.wisdom.core.domain.Inspect_appeal;
 import cn.hwsoft.wisdom.core.domain.Inspect_type;
+import cn.hwsoft.wisdom.core.domain.User;
 import cn.hwsoft.wisdom.core.query.JSONResult;
+import cn.hwsoft.wisdom.core.query.QueryObject;
+import cn.hwsoft.wisdom.core.service.AdminService;
 import cn.hwsoft.wisdom.core.service.InspectAppealService;
 import cn.hwsoft.wisdom.core.service.InspectTypeService;
+import cn.hwsoft.wisdom.core.service.UserService;
 import cn.hwsoft.wisdom.core.utils.BaseUtils;
 import cn.hwsoft.wisdom.core.utils.IpUtils;
 import cn.hwsoft.wisdom.core.utils.TimeUtils;
+import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 /**
  *
@@ -26,9 +30,43 @@ import java.util.List;
 public class InspectAppealController {
     @Autowired
     private InspectAppealService appealService;
-
     @Autowired
     private InspectTypeService typeService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private AdminService adminService;
+
+    /**
+     * 获取军检控告列表(分页,带条件)
+     * @param qo
+     * @return
+     */
+    @PostMapping("/list")
+    @ResponseBody
+    public JSONResult list(QueryObject qo){
+        JSONResult result = new JSONResult();
+        PageInfo<Inspect_appeal> pageInfo = appealService.list(qo);
+        List<Inspect_appeal> list = pageInfo.getList();
+        List<Object> viewList = new ArrayList<>();
+        //查询控告对应的user和处理的admin
+        for(Inspect_appeal appeal:list){
+            Integer id = appeal.getAdmin_id();
+            Admin admin = null;
+            if(id!=null && id!=0){
+                admin = adminService.selectAdmin(id);
+            }
+            Integer typeID = appeal.getType_id();
+            Inspect_type type = null;
+            if(typeID!=null && typeID!=0){
+                type = typeService.selectById(typeID);
+            }
+            AppealView view = new AppealView(appeal,type,admin,3);
+            viewList.add(view);
+        }
+        result.setData(new PageView(viewList,pageInfo.getTotal()));
+        return result;
+    }
 
     /**
      * 获取申述类型
@@ -81,18 +119,27 @@ public class InspectAppealController {
         JSONResult result = new JSONResult();
         Inspect_appeal appeal = appealService.selectById(id);
         Inspect_type type = null;
+        Admin admin = null;
         if(appeal!=null){
             type = typeService.selectById(appeal.getType_id());
+            admin = adminService.selectAdmin(appeal.getAdmin_id());
         }
-        HashMap<String,Object> map = new HashMap<>();
-        map.put("appeal",appeal);
-        map.put("type",type);
-        result.setData(map);
-        //String string= JSON.toJSONString(result);
+        result.setData(new AppealView(appeal,type,admin,1));
         return  result;
     }
 
+}
 
 
+class AppealView extends InspectView{
+    public Object target;
 
+    public AppealView(Object data, Inspect_type type, Admin admin,int dataType) {
+        super(data, type, admin,dataType);
+    }
+
+    public AppealView(Object data, Inspect_type type, Admin admin,int dataType, Object target) {
+        super(data, type, admin,dataType);
+        this.target = target;
+    }
 }
