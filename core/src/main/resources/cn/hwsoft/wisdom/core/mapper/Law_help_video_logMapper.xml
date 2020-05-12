@@ -184,6 +184,9 @@
             <if test="query.tag != 0">
                 and tag=#{query.tag}
             </if>
+            <if test="query.userId != null">
+                and user_id=#{query.userId}
+            </if>
             <if test="query.reply_mark != 0">
                 and reply_mark=#{query.reply_mark}
             </if>

@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.Date;
 
 /**
@@ -67,7 +68,7 @@ public class UserController {
 
     @RequestMapping("/login")  //用户登陆
     @ResponseBody
-    public JSONResult login(HttpServletRequest request, User user){
+    public JSONResult login(HttpServletRequest request, User user, HttpSession session){
         JSONResult result = new JSONResult();
         //根据用户的身份证号和密码查找user
         User user1 = userService.selectById(user);
@@ -86,6 +87,7 @@ public class UserController {
             userService.addRecord(record);
             user1.setPassword(null);
             result.setData(user1);
+            session.setAttribute("user",user1);
         }else {
             result.mark("没有该用户");
         }

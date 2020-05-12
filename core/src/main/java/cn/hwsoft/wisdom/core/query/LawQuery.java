@@ -10,6 +10,7 @@ import lombok.ToString;
  */
 @Getter@Setter@ToString
 public class LawQuery {
+    private Integer userId;
     private String keyword;
     private int page=1;//页码
     private int limit=10;//每页显示数量
