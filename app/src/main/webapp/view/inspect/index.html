@@ -43,63 +43,19 @@
 
 <div class="layui-container">
     <div class="layui-row layui-col-space15">
-        <div class="layui-col-md8">
-            <div class="fly-panel" style="margin-bottom: 0;">
-                <div class="fly-panel-title fly-filter">
-                    <a href="" class="layui-this">军检举报</a>
-                    <span class="fly-mid"></span>
-                    <a href="">军检控告</a>
-                    <span class="fly-mid"></span>
-                    <a href="">军检申诉</a>
-                    <span class="fly-mid"></span>
-                    <span class="fly-filter-right layui-hide-xs">
-          </span>
-                </div>
-
-                <ul class="fly-list" id="data_ul">
-
-                </ul>
-
-                <!-- <div class="fly-none">没有相关数据</div> -->
-                <div id="page"></div>
+        <div class="layui-tab layui-tab-brief layui-col-md8" lay-filter="inspect_tab">
+            <ul class="layui-tab-title fly-panel-title fly-filter">
+                <li class="layui-this">军检举报</li>
+                <li>军检控告</li>
+                <li>军检申诉</li>
+            </ul>
+            <div class="layui-tab-content">
+                <div  class="fly-list layui-tab-item layui-show"> <div id="inform_data"></div><div id="inform_page"></div></div>
+                <div class="fly-list layui-tab-item"><div id="sue_data"></div><div id="sue_page"></div></div>
+                <div class="fly-list layui-tab-item"><div id="appeal_data"></div><div id="appeal_page"></div></div>
             </div>
         </div>
-        <div class="layui-col-md4">
-            <dl class="fly-panel fly-list-one">
-                <!--        TODO 这周的新闻-->
-                <dt class="fly-panel-title">本周新闻</dt>
-                <dd>
-                    <a href="">基于 layui 的极简社区页面模版</a>
-                    <span><i class="iconfont icon-pinglun1"></i> 16</span>
-                </dd>
-
-                <!-- 无数据时 -->
-                <!--
-                <div class="fly-none">没有相关数据</div>
-                -->
-            </dl>
-
-            <div class="fly-panel">
-                <div class="fly-panel-title">
-                    这里可作为广告区域
-                </div>
-                <div class="fly-panel-main">
-                    <a href="" target="_blank" class="fly-zanzhu" style="background-color: #393D49;">虚席以待</a>
-                </div>
-            </div>
-
-            <div class="fly-panel fly-link">
-                <h3 class="fly-panel-title">友情链接</h3>
-                <dl class="fly-panel-main">
-                    <dd><a href="http://www.layui.com/" target="_blank">layui</a><dd>
-                    <dd><a href="http://layim.layui.com/" target="_blank">WebIM</a><dd>
-                    <dd><a href="http://layer.layui.com/" target="_blank">layer</a><dd>
-                    <dd><a href="http://www.layui.com/laydate/" target="_blank">layDate</a><dd>
-                    <dd><a href="mailto:xianxin@layui-inc.com?subject=%E7%94%B3%E8%AF%B7Fly%E7%A4%BE%E5%8C%BA%E5%8F%8B%E9%93%BE" class="fly-link">申请友链</a><dd>
-                </dl>
-            </div>
-
-        </div>
+        <span id="sidebar"></span>
     </div>
 </div>
 
@@ -109,75 +65,71 @@
 <script>
     $("#header").load("../header.html");
     $("#footer").load("../footer.html");
+    $("#sidebar").load("sidebar.html");
 </script>
 
 <script src="../../res/layui/layui.js"></script>
-<script>
-    layui.cache.page = 'jie';
-    layui.cache.user = {
-        username: '游客'
-        ,uid: -1
-        ,avatar: '../../res/images/avatar/00.jpg'
-        ,experience: 83
-        ,sex: '男'
-    };
-    layui.config({
-        version: "3.0.0"
-        ,base: '../../res/mods/'
-    }).extend({
-        fly: 'index'
-    }).use('fly');
-</script>
 
 <script>
-    layui.use(['laypage','jquery','laytpl'], function(){
+    layui.use(['laypage','jquery','laytpl','element'], function(){
         var laypage = layui.laypage;
         var laytpl = layui.laytpl;
+        var element = layui.element;
         $ = layui.jquery;
         var total = 0;
-        function showRecord(pageNo,pageSize){
+        var size = 5;
+        var inspectType = 0;
+        
+        function drawTpl(data,index) {
+            var id;
+            if (index == 0){
+                id = "inform_data"
+            }else if (index == 1){
+                id = "sue_data"
+            }else{
+                id = "appeal_data"
+            }
+            console.log(id);
+            var getTpl = list_tpl.innerHTML // list_tpl 模板
+                ,view = document.getElementById(id);
+            laytpl(getTpl).render(data, function(html){
+                view.innerHTML = html;
+            });
+        }
+
+        function showRecord(pageNo,pageSize,index,isFirst){
+            var urlPath = "";
+            var pageID = "";
+            if (index == null || index == 0){
+                urlPath = "inform";
+                pageID = "inform_page"
+            }else if (index == 1){
+                urlPath = "sue";
+                pageID = "sue_page"
+            }else{
+                urlPath = "appeal";
+                pageID = "appeal_page";
+            }
             $.ajax({
                 //请求方式
                 type : "POST",
                 //请求地址
-                url : path+'/inspect/inform/list.do',
+                url : path+'/inspect/'+urlPath+'/list.do',
                 //数据，json字符串
                 data : {
                     currentPage:pageNo,
-                    pageSize:pageSize,
+                    pageSize:pageSize
                 },
                 datatype:"json",
                 //请求成功
                 success : function(res) {
                     console.log(res);
-                    var pageInfo =res.data['informs'];
-                    total = pageInfo.total;
-                    var adminMap =res.data['adminMap'];
-                    var typeMap = res.data['typeMap'];
-                    var list = pageInfo.list;
-                    //console.log(adminMap);
-                    var data = [];
-                    for (var i in list){
-                        var appeal = list[i];
-                        var obj = {};
-                        var admin= null,type= null,ad= null,ty= null;
-                        admin = adminMap[appeal.id];
-                        if (admin != null){
-                            ad = {'adminName':admin.realname,'adminId':admin.id};
-                        }
-                        type = typeMap[appeal.id];
-                        if (type != null){
-                            ty = {'type':type['title']};
-                        }
-                        Object.assign(obj, appeal, ad,ty);
-                        data.push(obj);
+                    var list =res.data['list'];
+                    total =res.data.total;
+                    drawTpl(list,index);
+                    if (isFirst){
+                        SetPage(pageID,total);
                     }
-                    console.log(data);
-                    var getTpl = list_tpl.innerHTML
-                        ,view = document.getElementById('data_ul');
-                    laytpl(getTpl).render(data, function(html){
-                        view.innerHTML = html;
-                    });
                 },
                 //请求失败，包含具体的错误信息
                 error : function(res){
@@ -185,6 +137,24 @@
                 }
             });
         };
+        function SetPage(id,total) {
+            laypage.render({
+                elem: id
+                , count: total
+                , limit:5
+                , curr: 1                        //起始页
+                , groups: 5                      //连续页码个数
+                , prev: '上一页'                 //上一页文本
+                , next: '下一页'                 //下一页文本
+                , first: 1                      //首页文本
+                , limits: [5,10,15]
+                , layout: ['prev', 'page', 'next','limit','refresh','skip']
+                , jump: function (obj,first) {
+                    size = obj.limit;
+                    showRecord(obj.curr,obj.limit,inspectType,false);
+                }
+            })
+        }
         $.ajax({
             //请求方式
             type : "POST",
@@ -197,24 +167,16 @@
             },
             datatype:"json",
             //请求成功
-            success : function(res){
-                pageInfo =res.data['informs'];
-                laypage.render({
-                    elem: 'page'
-                    , count: pageInfo.total
-                    ,limit:5
-                    , curr: 1                        //起始页
-                    , groups: 5                      //连续页码个数
-                    , prev: '上一页'                 //上一页文本
-                    , next: '下一页'                 //下一页文本
-                    , first: 1                      //首页文本
-                    ,limits: [5,10,15]
-                    , layout: ['prev', 'page', 'next','limit','refresh','skip']
-                    , jump: function (obj,first) {
-                        showRecord(obj.curr,obj.limit);
-                    }
-            })}
+            success : function(res) {
+                pageInfo = res.data['list'];
+                SetPage("inform_page", pageInfo.total)
+            }
         });
+
+        element.on("tab(inspect_tab)",function (data) {
+            inspectType = data.index;
+            showRecord(1,5,inspectType,true);
+        })
     });
 
 </script>
@@ -224,36 +186,29 @@
     {{#  layui.each(d, function(index, item){ }}
     <li style="height: 200px">
         <a href="user/home.html" class="fly-avatar">
-            <img src="https://tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg" alt="贤心">
+            <img src="https://tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg" alt="{{= item.adminName}}">
         </a>
         <h2>
-            <a class="layui-badge">{{= item.type}}</a>
-            <a href="detail.html">{{= item.title}}</a>
-            {{#     if(item.process_status == 1){          }}
-            <span>| </span><span class="status_1">已提交</span></td>
-            {{#     }else if(item.process_status == 2){    }}
-            <span>| </span><span class="status_2">已受理</span></td>
+            <a class="layui-badge">{{ !item.type?null:item.type.title}}</a>
+            <a href="detail.html?id={{ item.data.id}}&type={{item.dataType}}">{{= !item.type?null:item.type.title}}</a>
+            {{#     if(item.data.process_status == 1){          }}
+            | <span class="status_1">已提交</span>
+            {{#     }else if(item.data.process_status == 2){    }}
+            | <span class="status_2">已受理</span>
             {{#     }else{                              }}
-            <span>| </span><span class="status_3">已完结</span></td>
+            | <span class="status_3">已完结</span>
             {{#     } }}
         </h2>
         <div>
-            <a href="user/home.html" link>
-<!--                <cite>{{= item.adminName}}</cite>-->
-                <!--
-                <i class="iconfont icon-renzheng" title="认证信息：XXX"></i>
-                <i class="layui-badge fly-badge-vip">VIP3</i>
-                -->
-            </a>
             <p>
                 <h3 class="detail_text">
-                    {{ item.detail }}
+                    {{ item.data.detail }}
                 </h3>
             </p>
             {{#
-            if (CheckIsNullOrEmpty(item.create_time)){
+            if (CheckIsNullOrEmpty(item.data.create_time)){
             var date = new Date();
-            var createTime = item.create_time+"000";
+            var createTime = item.data.create_time+"000";
             date.setTime(createTime);
             var t = date.Format("yyyy-MM-dd hh:mm:ss");
             }}
@@ -264,16 +219,7 @@
             <span class="time_text"> 无</span>
             {{# } }}
 
-
-<!--            <span class="fly-list-kiss layui-hide-xs" title="悬赏飞吻"><i class="iconfont icon-kiss"></i> 60</span>-->
-<!--            &lt;!&ndash;<span class="layui-badge fly-badge-accept layui-hide-xs">已结</span>&ndash;&gt;-->
-<!--            <span class="fly-list-nums">-->
-<!--                <i class="iconfont icon-pinglun1" title="回答"></i> 66-->
-<!--              </span>-->
         </div>
-<!--        <div class="fly-list-badge">-->
-<!--            &lt;!&ndash;<span class="layui-badge layui-bg-red">精帖</span>&ndash;&gt;-->
-<!--        </div>-->
     </li>
     {{#  }); }}
 </script>
