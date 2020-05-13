@@ -99,10 +99,11 @@
         if (!success){
           layer.msg(msg,{icon:1});
         }else{
+          var user = JSON.stringify(res.data);
+          window.sessionStorage.user = user;
           layer.msg("登陆成功!",{icon:1},function () {
             location.href=path+'/view/index.html';
           });
-          var user = JSON.stringify(res.data);
           console.log(user);
           setCookie("user",user,30);
         }

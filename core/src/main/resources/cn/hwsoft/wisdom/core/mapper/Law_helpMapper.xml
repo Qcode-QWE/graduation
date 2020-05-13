@@ -204,10 +204,14 @@
 
   <select id="selectCount" resultType="java.lang.Integer">
     SELECT count(DISTINCT uid) from law_help
-    where tag=#{tag}
-    <if test="reply_mark != 0">
-      and reply_mark=#{reply_mark}
-     </if>
+    <where>
+      <if test="tag != null and tag != 0">
+        and tag=#{tag}
+      </if>
+      <if test="reply_mark != 0">
+        and reply_mark=#{reply_mark}
+      </if>
+    </where>
   </select>
 
   <select id="selectUids" parameterType="cn.hwsoft.wisdom.core.domain.Law_helpExample" resultType="java.lang.Integer">
@@ -227,6 +231,20 @@
     <if test="startRow != null &amp;&amp; pageSize != null">
       limit ${startRow},${pageSize}
     </if>
+  </select>
+  <select id="selectCountByUser" resultType="java.lang.Integer">
+    SELECT count(DISTINCT uid) from law_help
+    <where>
+      <if test="tag != null and tag != 0">
+        and tag=#{tag}
+      </if>
+      <if test="reply_mark != 0">
+        and reply_mark=#{reply_mark}
+      </if>
+      <if test="userId != null and userId != 0">
+        and uid=#{userId}
+      </if>
+    </where>
   </select>
 
   <update id="updateByExampleSelective" parameterType="map">

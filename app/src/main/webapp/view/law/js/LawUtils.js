@@ -19,13 +19,9 @@ function toolWindow(title,url,tag,tableResult) {
         },
         end:function () {
             //重载表格
-            console.log("aaa");
             tableResult.reload({
-                url:path+'/law/help/list.do',
-                method: 'get',
-                where:{
-                    tag: tag
-                },
+                url:path+'/law/help/allList.do',
+                method: 'post',
                 page:{
                     curr:1
                 }

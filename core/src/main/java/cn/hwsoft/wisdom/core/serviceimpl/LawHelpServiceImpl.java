@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @program: court
@@ -41,7 +41,9 @@ public class LawHelpServiceImpl implements LawHelpService {
         Law_helpExample example = new Law_helpExample();
         Law_helpExample.Criteria criteria = example.createCriteria();
         criteria.andUidEqualTo(id);
-        criteria.andTagEqualTo(tag);
+        if (tag != 0) {
+            criteria.andTagEqualTo(tag);
+        }
         example.setOrderByClause("create_time desc");
         List<Law_help> list = lawHelpMapper.selectByExample(example);
         return new PageInfo<>(list);
@@ -106,7 +108,9 @@ public class LawHelpServiceImpl implements LawHelpService {
         if (query.getReply_mark() != (byte) 0) {
             criteria.andReply_markEqualTo(query.getReply_mark());
         }
-        criteria.andTagEqualTo(query.getTag());
+        if (Objects.nonNull(query.getTag()) && query.getTag() != 0) {
+            criteria.andTagEqualTo(query.getTag());
+        }
         criteria.andUidEqualTo(uid);
         example.setOrderByClause("create_time desc");
         List<Law_help> list = lawHelpMapper.selectByExample(example);
@@ -122,7 +126,7 @@ public class LawHelpServiceImpl implements LawHelpService {
     }
 
     @Override  //通过uid查询留言记录数
-    public PageInfo<Law_help> searchByUids(Integer uid, byte reply_mark, byte tag,QueryObject qo) {
+    public PageInfo<Law_help> searchByUids(Integer uid, byte reply_mark, byte tag, QueryObject qo) {
         PageHelper.startPage(qo.getCurrentPage(), qo.getPageSize());
         Law_helpExample example = new Law_helpExample();
         Law_helpExample.Criteria criteria = example.createCriteria();
@@ -143,7 +147,9 @@ public class LawHelpServiceImpl implements LawHelpService {
         if (query.getReply_mark() != (byte) 0) {
             criteria.andReply_markEqualTo(query.getReply_mark());
         }
-        criteria.andTagEqualTo(query.getTag());
+        if(Objects.nonNull(query.getTag())&&query.getTag()!=0){
+            criteria.andTagEqualTo(query.getTag());
+        }
         //设置查询分页条件
         int start = (query.getPage() - 1) * query.getLimit();
         example.setStartRow(start);
