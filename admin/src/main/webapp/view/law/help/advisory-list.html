@@ -8,42 +8,42 @@
     <script type="text/javascript" src="../../../js/LawUtils.js"></script>
     <title>法律咨询</title>
     <!--[if lt IE 9]>
-   <script type="text/javascript" src="../../../js/html5shiv.min.js"></script>
-   <script type="text/javascript" src="../../../js/respond.js"></script>
+    <script type="text/javascript" src="../../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../../js/respond.js"></script>
     <![endif]-->
-   <meta name="renderer" content="webkit">
-   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 </head>
 <body>
 <div class="layui-fluid">
-   <div class="layui-row layui-col-space15">
-       <div class="layui-col-md12">
-           <div class="layui-card">
-               <div class="layui-card-body ">
-                   <form class="layui-form layui-col-space5">
-                       <div class="layui-form-item">
-                           <label class="layui-form-label">留言状态</label>
-                           <div class="layui-input-inline">
-                               <select name="reply_mark" lay-filter="mySelect">
-                                   <option value="0" selected="">全部</option>
-                                   <option value="1">待回复</option>
-                                   <option value="2">已回复</option>
-                               </select>
-                           </div>
-                       </div>
-                   </form>
-                   <div class="layui-card-body layui-table-body layui-table-main">
-                       <table id="mytable" class="layui-table" lay-filter="mytable"></table>
-                   </div>
-               </div>
-           </div>
-       </div>
-   </div>
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <form class="layui-form layui-col-space5">
+                        <div class="layui-form-item">
+                            <label class="layui-form-label">留言状态</label>
+                            <div class="layui-input-inline">
+                                <select name="reply_mark" lay-filter="mySelect">
+                                    <option value="0" selected="">全部</option>
+                                    <option value="1">待回复</option>
+                                    <option value="2">已回复</option>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="layui-card-body layui-table-body layui-table-main">
+                        <table id="mytable" class="layui-table" lay-filter="mytable"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <script type="text/html" id="barDemo">
-   <a class="layui-btn  layui-btn-xs" lay-event="detail">查看留言记录</a>
-   <!--<a class="layui-btn layui-btn-xs" lay-event="edit">回复</a>-->
+    <a class="layui-btn  layui-btn-xs" lay-event="detail">查看留言记录</a>
+    <!--<a class="layui-btn layui-btn-xs" lay-event="edit">回复</a>-->
     <!--<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>-->
 </script>
 <script>
@@ -91,7 +91,7 @@
             , limits: [15, 30, 40]
             , cols: [[ //表头
 //                {type:'checkbox'},  //开启复选框
-                 {field: 'id', title: 'ID', width: 80, sort: true,align:'center'}
+                {field: 'id', title: 'ID', width: 80, sort: true,align:'center'}
                 , {field: 'content', title: '留言内容', width: 200,align:'center'}
                 , {field: 'userRealName', title: '发送留言的用户', width: 200,align:'center'}
                 , {field: 'status', title: '数据状态', width: 150,align:'center'}
@@ -100,7 +100,7 @@
                 , {field: 'create_time', title: '创建时间', width: 220,align:'center',templet:'#createTime'}
                 ,{field:'operation',title:'操作',width: 200,toolbar: '#barDemo',align:'center'}   //添加操作
             ]]
-           ,done: function(res, curr, count){
+            ,done: function(res, curr, count){
                 //如果是异步请求数据方式，res即为你接口返回的信息。
                 //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
                 console.log(res);
@@ -182,7 +182,7 @@
                 url: path+"/law/help/edit.do",
                 type: "POST",
                 data:{"id":data.id,"tag":data.tag,"content":value,"pid":data.pid,"to_user_id":data.to_user_id
-                ,"from_user_id":data.from_user_id,"uid":data.uid},
+                    ,"from_user_id":data.from_user_id,"uid":data.uid},
                 dataType: "json",
                 success: function(data){
 
@@ -209,7 +209,7 @@
 //            console.log(data.elem); ////得到select原始DOM对象
             console.log(data.value); ////得到被选中的值
             var reply_mark=data.value;
-              tableResult.reload({
+            tableResult.reload({
                 url:path+'/law/help/list.do?tag=1',
                 method: 'get',
                 where:{

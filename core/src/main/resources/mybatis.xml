@@ -13,6 +13,8 @@
             <setting name="lazyLoadTriggerMethods" value="clone"/>
             <!-- 打印查询语句 -->
             <setting name="logImpl" value="STDOUT_LOGGING" />
+            <!--开启驼峰命名规则自动转换-->
+            <setting name="mapUnderscoreToCamelCase" value="true" />
         </settings>
 
     <plugins>

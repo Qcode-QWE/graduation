@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>查看留言记录</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
+    <link rel="stylesheet" href="../../../lib/layui/css/layui.css" type="text/css"/>
+    <link rel="stylesheet" href="../../../css/law-help-view.css" type="text/css">
+    <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
+    <script type="text/javascript" src="../../../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../../../js/baseUtils.js"></script>
+    <script type="text/javascript" src="../../../js/LawUtils.js"></script>
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+<div id="header"></div>
+
+<div class="layui-container fly-marginTop">
+    <div class="fly-panel fly-panel-user" pad20>
+        <div class="layui-tab layui-tab-brief" lay-filter="user">
+            <div class="layui-form-item">
+                <label class="layui-form-label">咨询标题</label>
+                <div class="layui-input-block" id="title">
+                </div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">咨询内容</label>
+                <div class="layui-input-block" id="question">
+                </div>
+            </div>
+
+            <div class="layui-col-md2">
+                <div class="layui-form-item">
+                    <button class="layui-btn" lay-submit id="connserver" lay-filter="connserver"
+                            lay-filter="connserver">Connect Sig
+                        Server
+                    </button>
+                    <button class="layui-btn" lay-submit id="leave" lay-filter="leave" disabled>Leave</button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-col-md5">
+                    <h2>Local:</h2>
+                    <video id="localvideo" autoplay playsinline></video>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-col-md5">
+                    <h2>Remote:</h2>
+                    <video id="remotevideo" autoplay playsinline></video>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
+<script src="../js/adapter-latest.js"></script>
+<script src="../js/client.js"></script>
+
+
+<script>
+    //Demo
+    layui.use(['form', 'layer', 'tree', 'util'], function () {
+        $ = layui.jquery;
+        var form = layui.form, layer = layui.layer;
+
+
+        //获取url参数
+        function GetRequest() {
+            var url = decodeURI(location.search); //获取url中"?"符后的字串
+            var theRequest = new Object();
+            if (url.indexOf("?") != -1) {
+                var str = url.substr(1);
+                strs = str.split("&");
+                for (var i = 0; i < strs.length; i++) {
+                    theRequest[strs[i].split("=")[0]] = unescape(strs[i].split("=")[1]);
+                }
+            }
+            return theRequest;
+        }
+
+        //获取tag  留言的类型
+        var id = GetRequest()['id'];
+        //获取pid  留言记录父id
+        var room = GetRequest()['room'];
+        //获取id
+        var question = GetRequest()['question'];
+        //获取uid
+        var title = GetRequest()['title'];
+        document.getElementById('title').innerHTML = title;
+        document.getElementById('question').innerHTML = question;
+        //监听connect
+        form.on('submit(connserver)', function (data) {
+            connSignalServer(room);
+        });
+
+    });
+</script>
+</body>
+</html>
