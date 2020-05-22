@@ -26,4 +26,11 @@ public class JSONResult {
         jsonResult.setSuccess(true);
         return jsonResult;
     }
+
+    public static JSONResult error(String errorMsg) {
+        JSONResult jsonResult = new JSONResult();
+        jsonResult.setErrorMsg(errorMsg);
+        jsonResult.setSuccess(false);
+        return jsonResult;
+    }
 }

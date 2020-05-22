@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../../../lib/layui/css/layui.css" type="text/css"/>
+    <script type="text/javascript" src="../../../lib/layui/layui.all.js"></script>
+    <script type="text/javascript" src="../../../js/baseUtils.js"></script>
+    <script type="text/javascript" src="../../../js/LawUtils.js"></script>
+    <title>在线咨询</title>
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="../../../js/html5shiv.min.js"></script>
+    <script type="text/javascript" src="../../../js/respond.js"></script>
+    <![endif]-->
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body>
+<div class="layui-fluid">
+    <div class="layui-row layui-col-space15">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <div class="layui-card-body ">
+                    <div class="layui-card-body layui-table-body layui-table-main">
+                        <table id="mytable" class="layui-table" lay-filter="mytable"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn  layui-btn-xs" lay-event="detail">connect</a>
+<!--    <a class="layui-btn  layui-btn-xs" lay-event="detail">查看留言记录</a>-->
+    <!--<a class="layui-btn layui-btn-xs" lay-event="edit">回复</a>-->
+    <!--<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>-->
+</script>
+<script>
+    <!--分页查询-->
+    layui.use(['table', 'form', 'layer', 'jquery'], function () {
+        var table = layui.table;
+        var form = layui.form;   //只有执行了这一步，部分表单元素才会自动修饰成功
+        var layer = layui.layer;
+        var json = layui.json;
+        $ = layui.jquery;
+        form.render();       //手动渲染
+        //第一个实例
+        var tableResult = table.render({
+            elem: '#mytable'
+            , url: path + '/law/help/video/list.do' //数据接口
+            , method: 'get'
+            , where: {tag: 0}
+            , response: {
+                statusCode: 1 //重新规定成功的状态码为 1，table 组件默认为 0
+            }
+            , parseData: function (res) { //res 即为原始返回的数据
+                var itemList = res.data['list'];//留言完整记录
+                return {
+                    "code": res.success, //解析接口状态
+                    "msg": res.errorMsg, //解析提示文本
+                    "count": res.data['total'], //解析数据长度
+                    "data": itemList //解析数据列表
+                };
+            }
+            , page: true //开启分页
+            , limit: 15
+            , limits: [15, 30, 40]
+            , cols: [[ //表头
+//                {type:'checkbox'},  //开启复选框
+                {field: 'id', title: 'ID', width: 80, sort: true, align: 'center'}
+                , {field: 'room', title: '房间号', width: 200, align: 'center'}
+                , {field: 'title', title: '咨询标题', width: 200, align: 'center'}
+                , {field: 'question', title: '咨询内容', width: 200, align: 'center'}
+                , {field: 'status', title: '数据状态', width: 150, align: 'center'}
+                , {field: 'replyMark', title: '留言状态', width: 150, align: 'center'}
+                , {field: 'createAt', title: '创建时间', width: 220, align: 'center'}
+                , {field: 'operation', title: '操作', width: 200, toolbar: '#barDemo', align: 'center'}
+            ]]
+            , done: function (res, curr, count) {
+                //如果是异步请求数据方式，res即为你接口返回的信息。
+                //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+                console.log(res);
+                //得到当前页码
+//                console.log(curr);
+                //得到数据总量
+//                console.log(count);
+                $("[data-field='userName']").children().each(function () {
+                    if ($(this).text() == "") {
+                        $(this).text("管理员");
+                    }
+                });
+                $("[data-field='status']").children().each(function () {
+                    if ($(this).text() == '1') {
+                        $(this).text("正常");
+                    } else if ($(this).text() == '2') {
+                        $(this).text("异常");
+                    }
+                });
+                $("[data-field='replyMark']").children().each(function () {
+                    if ($(this).text() == '1') {
+                        $(this).html("<p style='color: orange'>待回复</p>");
+                    } else if ($(this).text() == '2') {
+                        $(this).text("已回复");
+                    }
+                });
+            }
+        });
+
+        //监听工具条   回复留言
+        table.on('tool(mytable)', function (obj) {
+            var data = obj.data;
+            var id = data.id;
+            var room = data.room;
+            var question = data.question;
+            var title = data.title;
+            if (obj.event === 'detail') {
+                toolWindow("通讯咨询室", "online-view.html?tag=3&id=" + id + "&room=" + room + "&question="+ question+ "&title=" + title + "", 3, tableResult);
+            } else if (obj.event === 'del') {
+                layer.confirm('真的删除么', function (index) {
+                    obj.del();
+                    Delete(data.id, index);
+//                    layer.close(index);
+                });
+            } else if (obj.event === 'edit') { //编辑留言
+//                layer.alert('编辑行：<br>'+ JSON.stringify(data))
+                layer.prompt({
+                    formType: 2
+                    , title: '回复留言'
+                    , value: ""
+                }, function (value, index) {
+                    //这里一般是发送修改的Ajax请求
+                    Eidt(data, value, index, obj);
+                });
+
+            }
+        });
+
+    });
+</script>
+
+</html>

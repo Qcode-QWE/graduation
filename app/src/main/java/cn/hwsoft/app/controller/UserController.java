@@ -43,6 +43,10 @@ public class UserController {
         user.setCreate_time(Integer.valueOf(dateToTimeStamp));
         //设置更新时间
         user.setUpdate_time(Integer.valueOf(dateToTimeStamp));
+        user.setPhone(0L);
+        user.setCover("");
+        user.setAddress("");
+        user.setStatus((byte) 1);
         userService.register(user);
         return result;
     }
