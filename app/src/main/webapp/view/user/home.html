@@ -7,6 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <link rel="stylesheet" href="../../res/layui/css/layui.css">
   <link rel="stylesheet" href="../../res/css/global.css">
+  <script type="text/javascript" src="../../res/layui/jquery.min.js" charset="utf-8"></script>
+  <script type="text/javascript" src="../../res/js/baseUtils.js" charset="utf-8"></script>
 </head>
 <body style="margin-top: 65px;">
 
@@ -17,6 +19,7 @@
   <h1>
 <!--   用户信息-->
   </h1>
+  <div id="user"></div>
 
 </div>
 
@@ -38,3 +41,79 @@
 <script src="../../res/layui/layui.js"></script>
 </body>
 </html>
+
+<script>
+  layui.use(['laypage','jquery','laytpl','element'], function(){
+    var laypage = layui.laypage;
+    var laytpl = layui.laytpl;
+    var element = layui.element;
+    $ = layui.jquery;
+    var u,hasLogin = checkLogin();
+    if(!hasLogin) {
+      layer.msg("您还没登录，请先登录",{icon:1},function () {
+        location.href=path+'/view/index.html';
+      });
+    }
+
+    $.ajax({
+      //请求方式
+      type : "GET",
+      //请求地址
+      url : path+'/user/mine/'+u.id+'.do',
+      //数据，json字符串
+      datatype:"json",
+      //请求成功
+      success : function(res) {
+        var getTpl = list_tpl.innerHTML // list_tpl 模板
+                , view = document.getElementById(id);
+        laytpl(getTpl).render(data, function (html) {
+          view.innerHTML = html;
+        });
+      }
+    })
+    $.ajax({
+      //请求方式
+      type : "POST",
+      //请求地址
+      url : path+'/inspect/inform/list.do',
+      //数据，json字符串
+      data : {
+        currentPage:1,
+        pageSize:5,
+      },
+      datatype:"json",
+      //请求成功
+      success : function(res) {
+        var getTpl = list_tpl.innerHTML // list_tpl 模板
+                , view = document.getElementById(id);
+        laytpl(getTpl).render(data, function (html) {
+          view.innerHTML = html;
+        });
+      }
+    });
+
+</script>
+
+
+<script id="user_tpl" type="text/html">
+  <p style="padding: 10px 0; color: #5FB878;">姓名:{{ d.realname}}}</p>
+
+  <p class="fly-home-info">
+    <i class="iconfont icon-shijian"></i><span>
+    {{#
+            if (CheckIsNullOrEmpty(item.data.create_time)){
+            var date = new Date();
+            var createTime = item.data.create_time+"000";
+            date.setTime(createTime);
+            var t = date.Format("yyyy-MM-dd hh:mm:ss");
+            }}
+            <span class="time_text"> {{ t }}</span>
+            {{#
+            }else {
+            }}
+            <span class="time_text"> 无</span>
+            {{# } }}
+    注册</span>
+    <i class="iconfont icon-chengshi"></i><span>来自{{d.address}}}</span>
+  </p>
+</script>

@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword( MD5Utils.md5(user.getPassword()));
         //用户状态默认为1，即为正常
         user.setStatus((byte) 1);
-        userMapper.insert(user);
+        userMapper.insertSelective(user);
     }
 
     @Override  //根据用户身份证和密码查找user

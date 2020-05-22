@@ -27,7 +27,7 @@
               <div class="layui-form-item">
                 <label for="L_email" class="layui-form-label">身份证号</label>
                 <div class="layui-input-inline">
-                  <input type="text" id="L_email" name="identity" required lay-verify="" autocomplete="off" class="layui-input">
+                  <input type="text" id="L_email" name="identity" required lay-verify="identity" autocomplete="off" class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux">将会成为您唯一的登入名</div>
               </div>
@@ -48,15 +48,6 @@
                 <label for="L_repass" class="layui-form-label">确认密码</label>
                 <div class="layui-input-inline">
                   <input type="password" id="L_repass" name="repass" required lay-verify="required|confirmPass" autocomplete="off" class="layui-input">
-                </div>
-              </div>
-              <div class="layui-form-item">
-                <label for="L_vercode" class="layui-form-label">人类验证</label>
-                <div class="layui-input-inline">
-                  <input type="text" id="L_vercode" name="vercode" required lay-verify="required" placeholder="请回答后面的问题" autocomplete="off" class="layui-input">
-                </div>
-                <div class="layui-form-mid">
-                  <span style="color: #c00;">{{d.vercode}}</span>
                 </div>
               </div>
               <div class="layui-form-item">
@@ -104,6 +95,7 @@
         data : {
           identity:identity,
           nickname:nickname,
+          realname:nickname,
           password:pass
         },
         datatype:"json",
