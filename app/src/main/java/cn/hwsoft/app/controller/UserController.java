@@ -111,7 +111,7 @@ public class UserController {
         User user = userService.findUserById(id);
         JSONResult result = new JSONResult();
         if (user != null) {
-            result.setData(result);
+            result.setData(user);
         }else {
             result.mark("没有该用户");
         }

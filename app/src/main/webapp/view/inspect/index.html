@@ -190,7 +190,7 @@
         </a>
         <h2>
             <a class="layui-badge">{{ !item.type?null:item.type.title}}</a>
-            <a href="detail.html?id={{ item.data.id}}&type={{item.dataType}}">{{= !item.type?null:item.type.title}}</a>
+            <a href="detail.html?id={{ item.data.id}}&type={{item.dataType}}">{{= !item.data.title?null:item.data.title}}</a>
             {{#     if(item.data.process_status == 1){          }}
             | <span class="status_1">已提交</span>
             {{#     }else if(item.data.process_status == 2){    }}

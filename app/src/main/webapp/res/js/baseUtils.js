@@ -181,9 +181,15 @@ function getCookie(c_name)
 function checkLogin(){
     var user = getCookie("user");
     if( user != null && user != "" && user != "null") {
-        return user ,true
+        return {
+            "user":user,
+            "has":true
+        }
     }
-    return null,false
+    return {
+        "user":null,
+        "has":false
+    }
 }
 
 function draw() {

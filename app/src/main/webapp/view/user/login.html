@@ -64,7 +64,7 @@
 
     //如果已经登录了,必须先退出
     //判断是否已经登录
-    var u,hasLogin = checkLogin();
+    var hasLogin = checkLogin().has;
     if( hasLogin) {
       layer.msg("您已经登录!",{icon:1},function () {
         location.href=path+'/view/index.html';
