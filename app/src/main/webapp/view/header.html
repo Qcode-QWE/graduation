@@ -29,7 +29,7 @@
 <!--                  <dd><a href="/app/view/user/message.html"><i class="iconfont icon-tongzhi" style="top: 4px;"></i>我的消息</a></dd>-->
                   <dd><a href="/app/view/user/home.html"><i class="layui-icon" style="margin-left: 2px; font-size: 22px;">&#xe68e;</i>我的主页</a></dd>
                   <hr style="margin: 5px 0;">
-                  <dd><a href="/app/view/user/logout/" style="text-align: center;">退出</a></dd>
+                  <dd><a onclick="exit()" style="text-align: center;">退出</a></dd>
                 </dl>
               </li>
 
@@ -68,5 +68,21 @@
     }else{
         $("#no_login").attr("style","display:block;");
         $("#has_login").attr("style","display:none;");
+    }
+</script>
+<script>
+    //退出登陆
+    function exit() {
+        //删除用户信息
+        window.setCookie("user",null);
+        //通知后台退出登陆
+        $.ajax({
+            url:path+'/user/exit.do',
+            method:'get',
+            async: false,//改为同步请求
+            success:function (data) {
+            }
+        });
+        location.href=path+'/view/index.html';
     }
 </script>
