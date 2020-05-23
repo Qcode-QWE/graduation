@@ -29,9 +29,11 @@ public interface Law_helpMapper {
 
     int updateByPrimaryKey(Law_help record);
 
-    int selectCount(@Param("reply_mark") byte reply_mark,@Param("tag")byte tag);
+    int selectCount(@Param("reply_mark") byte reply_mark, @Param("tag") byte tag);
 
-    int selectCountByUser(@Param("reply_mark") byte reply_mark,@Param("tag")byte tag,@Param("userId")Integer userId);
+    int selectCountByUser(@Param("reply_mark") byte reply_mark, @Param("tag") byte tag, @Param("userId") Integer userId);
 
     List<Integer> selectUids(Law_helpExample example);
+
+    Integer create(@Param("lawHelp") Law_help lawHelp);
 }

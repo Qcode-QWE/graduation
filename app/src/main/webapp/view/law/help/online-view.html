@@ -142,9 +142,10 @@
         } else if (tag == 3) {
             document.getElementById('tag').innerHTML = "司法救助";
         }
+        var user = JSON.parse(window.sessionStorage.user);
         //监听connect
         form.on('submit(connserver)', function (data) {
-            connSignalServer(room,"陈小鱼");
+            connSignalServer(room, user.realname);
         });
 
     });

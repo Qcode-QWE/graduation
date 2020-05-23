@@ -113,7 +113,6 @@ function message(text,type,layer) {
     });
 }
 
-
 //判断值是否为空
 function CheckIsNullOrEmpty(value) {
     var reg = /\s+/g//正则表达式用于判斷是否有空格或空字符串
@@ -187,5 +186,5 @@ function checkLogin(){
 }
 
 function draw() {
-    
+
 }

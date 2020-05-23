@@ -40,4 +40,6 @@ public interface LawHelpService {
     List<Integer> getUids(LawQuery query);
 
     Law_help getLawHelpById(Integer id);
+
+    boolean createLawHelpLog(Law_help lawHelp);
 }

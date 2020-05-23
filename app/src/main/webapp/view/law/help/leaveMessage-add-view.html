@@ -23,22 +23,14 @@
 
 <div class="layui-container fly-marginTop">
     <form class="layui-form" lay-filter="form" id="form">
-        <div class="layui-form-item">
-            <label class="layui-form-label">咨询标题</label>
-            <div class="layui-input-block">
-                <input type="text" id="title" name="title" lay-verify="title" autocomplete="off" placeholder="请输入标题"
-                       class="layui-input">
-            </div>
-        </div>
-
         <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label">咨询问题</label>
+            <label class="layui-form-label">留言内容</label>
             <div class="layui-input-block">
                 <textarea placeholder="请输入内容" class="layui-textarea" id="question" name="question"></textarea>
             </div>
         </div>
         <div class="layui-form-item">
-            <label for="tag" class="layui-form-label" value="1">咨询类型</label>
+            <label for="tag" class="layui-form-label" value="1">留言类型</label>
             <div class="layui-input-block">
                 <select name="tag" id="tag" lay-verify="required">
                     <option value=1>法律咨询</option>
@@ -79,19 +71,18 @@
             //异步提交表单
             var field = data.field;
             var lawHelpMessage = {};
-            lawHelpMessage.title = field['title'];
-            lawHelpMessage.question = field['question'];
+            lawHelpMessage.content = field['question'];
             lawHelpMessage.tag = field['tag'];
 
             lawHelpMessage = JSON.stringify(lawHelpMessage);
             $.ajax({
-                url: path + '/law/help/video',
+                url: path + '/law/help',
                 method: 'post',
                 traditional: true,
                 data: {'request': lawHelpMessage},
                 dataType: 'JSON',
                 success: function (data) {
-                    if (data.success) {
+                    if (data != null) {
                         message('新增成功', 1, layer);
                     } else {
                         message('新增失败', 2, layer);
@@ -99,8 +90,7 @@
                     }
                 },
                 error: function (data) {
-                    message('服务器出了点问题', 2, layer);
-                    $('#formBut').removeAttr('disabled');
+                    message('新增成功', 1, layer);
                 }
             });
             return false;

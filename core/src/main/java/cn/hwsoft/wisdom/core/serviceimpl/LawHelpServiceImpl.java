@@ -165,4 +165,13 @@ public class LawHelpServiceImpl implements LawHelpService {
         return lawHelpMapper.selectByPrimaryKey(id);
     }
 
+    @Override
+    public boolean createLawHelpLog(Law_help lawHelp) {
+        Integer lawHelpLog = lawHelpMapper.create(lawHelp);
+        if (lawHelpLog > 0) {
+            return true;
+        }
+        return false;
+    }
+
 }

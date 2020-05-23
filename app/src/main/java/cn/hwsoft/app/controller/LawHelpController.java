@@ -12,9 +12,11 @@ import cn.hwsoft.wisdom.core.service.AdminService;
 import cn.hwsoft.wisdom.core.service.LawHelpService;
 import cn.hwsoft.wisdom.core.service.UserService;
 import cn.hwsoft.wisdom.core.utils.TimeUtils;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -86,22 +88,22 @@ public class LawHelpController {
         Integer userId = user.getId();
 
         int sum = 0;  //记录条数
-        sum = lawHelpMapper.selectCountByUser(query.getReply_mark(),(byte)0,userId);
+        sum = lawHelpMapper.selectCountByUser(query.getReply_mark(), (byte) 0, userId);
         result.setCount(sum);
         ArrayList<Law_help> resultData = new ArrayList<>();  //最终的结果
-        query.setTag((byte)1);
+        query.setTag((byte) 1);
         Law_help help1 = lawHelpService.searchByUid(query, userId);
-        query.setTag((byte)2);
+        query.setTag((byte) 2);
         Law_help help2 = lawHelpService.searchByUid(query, userId);
-        query.setTag((byte)3);
+        query.setTag((byte) 3);
         Law_help help3 = lawHelpService.searchByUid(query, userId);
-        if(Objects.nonNull(help1)){
+        if (Objects.nonNull(help1)) {
             resultData.add(help1);
         }
-        if(Objects.nonNull(help2)){
+        if (Objects.nonNull(help2)) {
             resultData.add(help2);
         }
-        if(Objects.nonNull(help3)){
+        if (Objects.nonNull(help3)) {
             resultData.add(help3);
         }
 
@@ -124,11 +126,11 @@ public class LawHelpController {
         PageInfo pageInfo = lawHelpService.searchByUids(lawHelp.getUid(), lawHelp.getReply_mark(), lawHelp.getTag(), qo);
         //根据留言记录查询用户姓名并封装
         List<Law_help> law_helps = pageInfo.getList();
-        if(law_helps!=null && law_helps.size()>0){
+        if (law_helps != null && law_helps.size() > 0) {
             List<Map<String, Object>> result = LawHelpToJsonObject(law_helps, Law_help.class);
             pageInfo.setList(result);
         }
-        JSONResult jsonResult=new JSONResult();
+        JSONResult jsonResult = new JSONResult();
         jsonResult.setData(pageInfo);
         return jsonResult;
     }
@@ -331,11 +333,32 @@ public class LawHelpController {
         lawHelpService.saveAdminLawHelp(help);
         //查出最新的留言记录
         //封装查询条件
-        LawQuery lawQuery=new LawQuery();
+        LawQuery lawQuery = new LawQuery();
         lawQuery.setTag(lawHelp.getTag());
-        Law_help law_help=lawHelpService.searchByUid(lawQuery,lawHelp.getUid());
-        JSONResult jsonResult=new JSONResult();
+        Law_help law_help = lawHelpService.searchByUid(lawQuery, lawHelp.getUid());
+        JSONResult jsonResult = new JSONResult();
         jsonResult.setData(law_help);
         return jsonResult;
+    }
+
+    @PostMapping
+    public JSONResult createLawHelpLog(String request, HttpSession session) {
+        if (StringUtils.isEmpty(request)) {
+            return JSONResult.error("content params must not null!");
+        }
+
+        Law_help lawHelp = JSON.parseObject(request, Law_help.class);
+        if (StringUtils.isEmpty(lawHelp.getContent())) {
+            return JSONResult.error("content params must not null!");
+        }
+        User user = (User) session.getAttribute("user");
+
+        lawHelp.setFrom_user_id(user.getId());
+        lawHelp.setUid(user.getId());
+        lawHelp.setPid(0);
+        String s = TimeUtils.DateToTimeStamp(new Date());
+        lawHelp.setCreate_time(Integer.valueOf(s));
+        boolean b = lawHelpService.createLawHelpLog(lawHelp);
+        return JSONResult.success(b);
     }
 }

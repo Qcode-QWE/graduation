@@ -89,9 +89,9 @@
     <if test="orderByClause != null">
       order by ${orderByClause}
     </if>
-    <if test="startRow != null &amp;&amp; pageSize != null">
-      limit ${startRow},${pageSize}
-    </if>
+<!--    <if test="startRow != null &amp;&amp; pageSize != null">-->
+<!--      limit ${startRow},${pageSize}-->
+<!--    </if>-->
   </select>
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
     select 
@@ -195,7 +195,50 @@
       </if>
     </trim>
   </insert>
-  <select id="countByExample" parameterType="cn.hwsoft.wisdom.core.domain.Law_helpExample" resultType="java.lang.Long">
+    <insert id="create" parameterType="cn.hwsoft.wisdom.core.domain.Law_help">
+      insert into law_help
+      <trim prefix="(" suffix=")" suffixOverrides=",">
+        <if test="lawHelp.uid != null">
+          uid,
+        </if>
+        <if test="lawHelp.pid != null">
+          pid,
+        </if>
+        <if test="lawHelp.from_user_id != null">
+          from_user_id,
+        </if>
+        <if test="lawHelp.content != null">
+          content,
+        </if>
+        <if test="lawHelp.tag != null">
+          tag,
+        </if>
+        <if test="lawHelp.create_time != null">
+          create_time,
+        </if>
+      </trim>
+      <trim prefix="values (" suffix=")" suffixOverrides=",">
+        <if test="lawHelp.uid != null">
+          #{lawHelp.uid},
+        </if>
+        <if test="lawHelp.pid != null">
+          #{lawHelp.pid},
+        </if>
+        <if test="lawHelp.from_user_id != null">
+          #{lawHelp.from_user_id},
+        </if>
+        <if test="lawHelp.content != null">
+          #{lawHelp.content},
+        </if>
+        <if test="lawHelp.tag != null">
+          #{lawHelp.tag},
+        </if>
+        <if test="lawHelp.create_time != null">
+          #{lawHelp.create_time},
+        </if>
+      </trim>
+    </insert>
+    <select id="countByExample" parameterType="cn.hwsoft.wisdom.core.domain.Law_helpExample" resultType="java.lang.Long">
     select count(*) from law_help
     <if test="_parameter != null">
       <include refid="Example_Where_Clause" />

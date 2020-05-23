@@ -97,6 +97,13 @@
     $("#header").load("../../header.html");
     $("#footer").load("../../footer.html");
 </script>
+
+<!--头工具栏 -->
+<script type="text/html" id="toolbarDemo">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">新增留言</button>
+    </div>
+</script>
 <script type="text/html" id="barDemo">
     <a class="layui-btn  layui-btn-xs" lay-event="detail">查看留言记录</a>
     <!--<a class="layui-btn layui-btn-xs" lay-event="edit">回复</a>-->
@@ -108,30 +115,31 @@
         var table = layui.table;
         var form = layui.form;   //只有执行了这一步，部分表单元素才会自动修饰成功
         var layer = layui.layer;
-        var json=layui.json;
+        var json = layui.json;
         $ = layui.jquery;
         form.render();       //手动渲染
         //第一个实例
-        var tableResult=table.render({
+        var tableResult = table.render({
             elem: '#mytable'
-            , url: path+'/law/help/allList.do' //数据接口
+            , toolbar: '#toolbarDemo'
+            , url: path + '/law/help/allList.do' //数据接口
             , method: 'post'
             , response: {
                 statusCode: 1 //重新规定成功的状态码为 1，table 组件默认为 0
             }
             , parseData: function (res) { //res 即为原始返回的数据
-                var appeals =res.obj['informs'];//留言完整记录
+                var appeals = res.obj['informs'];//留言完整记录
                 var userMap = res.obj['userMap'];//每条留言对应的用户信息
                 var data = [];
-                for (var i in appeals){
+                for (var i in appeals) {
                     var appeal = appeals[i];//每条留言的完整记录
-                    var userInform=userMap[appeal.uid];//每条留言对应的用于信息
+                    var userInform = userMap[appeal.uid];//每条留言对应的用于信息
                     var user;
-                    if(null != userInform){
-                        user={'userRealName':userInform.realname};
+                    if (null != userInform) {
+                        user = {'userRealName': userInform.realname};
                     }
                     var obj = {};
-                    Object.assign(obj, appeal,user);
+                    Object.assign(obj, appeal, user);
                     data.push(obj);
                 }
                 return {
@@ -146,16 +154,17 @@
             , limits: [15, 30, 40]
             , cols: [[ //表头
 //                {type:'checkbox'},  //开启复选框
-                {field: 'id', title: 'ID', width: 80, sort: true,align:'center'}
-                , {field: 'content', title: '留言内容', width: 200,align:'center'}
-                , {field: 'userRealName', title: '发送留言的用户', width: 200,align:'center'}
-                , {field: 'status', title: '数据状态', width: 150,align:'center'}
-                , {field: 'reply_mark', title: '留言状态', width: 150,align:'center'}
-                , {field: 'from_mark', title: '来源', width: 160,align:'center'}
-                , {field: 'create_time', title: '创建时间', width: 220,align:'center',templet:'#createTime'}
-                ,{field:'operation',title:'操作',width: 200,toolbar: '#barDemo',align:'center'}   //添加操作
+                {field: 'id', title: 'ID', width: 80, sort: true, align: 'center'}
+                , {field: 'content', title: '留言内容', width: 200, align: 'center'}
+                , {field: 'userRealName', title: '发送留言的用户', width: 200, align: 'center'}
+                , {field: 'tag', title: '留言类型', width: 150, align: 'center'}
+                , {field: 'status', title: '数据状态', width: 150, align: 'center'}
+                , {field: 'reply_mark', title: '留言状态', width: 150, align: 'center'}
+                , {field: 'from_mark', title: '来源', width: 160, align: 'center'}
+                , {field: 'create_time', title: '创建时间', width: 220, align: 'center', templet: '#createTime'}
+                , {field: 'operation', title: '操作', width: 200, toolbar: '#barDemo', align: 'center'}   //添加操作
             ]]
-            ,done: function(res, curr, count){
+            , done: function (res, curr, count) {
                 //如果是异步请求数据方式，res即为你接口返回的信息。
                 //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
                 console.log(res);
@@ -163,54 +172,74 @@
 //                console.log(curr);
                 //得到数据总量
 //                console.log(count);
-                $("[data-field='from_mark']").children().each(function(){
-                    if($(this).text()=='1'){
+                $("[data-field='from_mark']").children().each(function () {
+                    if ($(this).text() == '1') {
                         $(this).text("普通用户");
-                    }else if($(this).text()=='2'){
+                    } else if ($(this).text() == '2') {
                         $(this).text("工作人员");
                     }
                 });
-                $("[data-field='status']").children().each(function(){
-                    if($(this).text()=='1'){
+                $("[data-field='status']").children().each(function () {
+                    if ($(this).text() == '1') {
                         $(this).text("正常");
-                    }else if($(this).text()=='2'){
+                    } else if ($(this).text() == '2') {
                         $(this).text("异常");
                     }
                 });
-                $("[data-field='reply_mark']").children().each(function(){
-                    if($(this).text()=='1'){
+                $("[data-field='reply_mark']").children().each(function () {
+                    if ($(this).text() == '1') {
                         $(this).html("<p style='color: orange'>待回复</p>");
-                    }else if($(this).text()=='2'){
+                    } else if ($(this).text() == '2') {
                         $(this).text("已回复");
+                    }
+                });
+                $("[data-field='tag']").children().each(function () {
+                    if ($(this).text() == '1') {
+                        $(this).html("<p style='color: orange'>法律咨询</p>");
+                    } else if ($(this).text() == '2') {
+                        $(this).html("<p style='color: orange'>法律援助</p>");
+                    } else if ($(this).text() == '3') {
+                        $(this).html("<p style='color: orange'>司法救助</p>");
                     }
                 });
             }
         });
 
+        //头工具栏事件
+        table.on('toolbar(mytable)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case 'add':
+                    xadmin.open('新增留言', './leaveMessage-add-view.html', 700, 400);
+                    break;
+            }
+            ;
+        });
+
         //监听工具条   回复留言
-        table.on('tool(mytable)', function(obj){
+        table.on('tool(mytable)', function (obj) {
             var data = obj.data;
-            var id=data.id;
-            var uid=data.uid;
-            var reply_mark=data.reply_mark;
-            if(obj.event === 'detail'){
-                toolWindow("查看留言记录","law-help-view.html?tag=1&id="+id+"&uid="+uid+"&reply_mark="+reply_mark+"",1,tableResult);
-            } else
-            if(obj.event === 'del'){
-                layer.confirm('真的删除么', function(index){
+            var id = data.id;
+            var uid = data.uid;
+            var reply_mark = data.reply_mark;
+            var tag = data.tag;
+            if (obj.event === 'detail') {
+                toolWindow("查看留言记录", "law-help-view.html?tag=" + tag + "&id=" + id + "&uid=" + uid + "&reply_mark=" + reply_mark + "", 1, tableResult);
+            } else if (obj.event === 'del') {
+                layer.confirm('真的删除么', function (index) {
                     obj.del();
-                    Delete(data.id,index);
+                    Delete(data.id, index);
 //                    layer.close(index);
                 });
-            } else if(obj.event === 'edit'){ //编辑留言
+            } else if (obj.event === 'edit') { //编辑留言
 //                layer.alert('编辑行：<br>'+ JSON.stringify(data))
                 layer.prompt({
                     formType: 2
-                    ,title: '回复留言'
-                    ,value: ""
-                }, function(value, index){
+                    , title: '回复留言'
+                    , value: ""
+                }, function (value, index) {
                     //这里一般是发送修改的Ajax请求
-                    Eidt(data,value,index,obj);
+                    Eidt(data, value, index, obj);
                 });
 
             }
@@ -218,30 +247,33 @@
 
 
         //删除留言
-        function Delete(id,index) {
+        function Delete(id, index) {
             $.ajax({
-                url:path+"/law/help/delete.do",
-                type:"POST",
-                data:{"id":id},
-                dataType:"json",
-                success:function (data) {
-                    if(data==1){
+                url: path + "/law/help/delete.do",
+                type: "POST",
+                data: {"id": id},
+                dataType: "json",
+                success: function (data) {
+                    if (data == 1) {
                         layer.close(index);
                         layer.msg("删除成功", {icon: 6});
                     }
                 }
             });
         }
-        function  Eidt(data,value,index,obj) {
-            $.ajax({
-                url: path+"/law/help/edit.do",
-                type: "POST",
-                data:{"id":data.id,"tag":data.tag,"content":value,"pid":data.pid,"to_user_id":data.to_user_id
-                    ,"from_user_id":data.from_user_id,"uid":data.uid},
-                dataType: "json",
-                success: function(data){
 
-                    if(data==1){
+        function Eidt(data, value, index, obj) {
+            $.ajax({
+                url: path + "/law/help/edit.do",
+                type: "POST",
+                data: {
+                    "id": data.id, "tag": data.tag, "content": value, "pid": data.pid, "to_user_id": data.to_user_id
+                    , "from_user_id": data.from_user_id, "uid": data.uid
+                },
+                dataType: "json",
+                success: function (data) {
+
+                    if (data == 1) {
                         //关闭弹框
                         layer.close(index);
                         //同步更新表格和缓存对应的值
@@ -251,7 +283,7 @@
                         layer.msg("留言成功", {icon: 1});
                         var cur = $(".layui-laypage-em").next().html();//获取当前页
                         window.location.reload();
-                    }else{
+                    } else {
                         layer.msg("修改失败", {icon: 5});
                     }
                 }
@@ -260,18 +292,18 @@
         }
 
         //监听听select选择
-        form.on('select(mySelect)', function(data){
+        form.on('select(mySelect)', function (data) {
 //            console.log(data.elem); ////得到select原始DOM对象
             console.log(data.value); ////得到被选中的值
-            var reply_mark=data.value;
+            var reply_mark = data.value;
             tableResult.reload({
-                url:path+'/law/help/allList.do',
+                url: path + '/law/help/allList.do',
                 method: 'post',
-                where:{
-                    reply_mark:reply_mark,
+                where: {
+                    reply_mark: reply_mark,
                 },
-                page:{
-                    curr:1
+                page: {
+                    curr: 1
                 }
             });
             return false; //阻止表单跳转。如果需要表单跳转，去掉这段即可。
