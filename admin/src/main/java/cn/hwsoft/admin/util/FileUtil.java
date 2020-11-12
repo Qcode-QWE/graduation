@@ -94,7 +94,7 @@ public class FileUtil {
     /**
      * 将文件的地址转为本机地址
      * @param file
-     * @return
+     * @return ...
      */
     public  static  String path(String file){
         //   /images/inspect/inform/47368541/47368541-image1.jpg 转为 D:/java/images/inspect/appeal/12345678/nav_c1.png

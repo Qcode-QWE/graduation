@@ -10,6 +10,18 @@
   <script type="text/javascript" src="../../res/layui/jquery.min.js" charset="utf-8"></script>
   <script type="text/javascript" src="../../res/js/baseUtils.js" charset="utf-8"></script>
 </head>
+<style type="text/css">
+    .status_1{
+        font-size: 5px; color: #2D93CA;text-align:center;line-height:15px;
+    }
+    .status_2{
+        font-size: 5px; color: orange;text-align:center;line-height:15px;
+    }
+    .status_3{
+        font-size: 5px; color: #FF5722;text-align:center;line-height:15px;
+    }
+
+</style>
 <body style="margin-top: 65px;">
 
 <div id="header"></div>
@@ -149,15 +161,9 @@
     {{#  layui.each(d, function(index, item){ }}
     <li style="height: 20px">
         <h2>
-            <a class="layui-badge">{{ !item.type?null:item.type}}</a>
-            <a href="../inspect/detail.html?id={{ item.id}}&type={{item.dataType}}">{{= !item.title?null:item.title}}</a>
-            {{#     if(item.process_status == 1){          }}
-            | <span class="status_1">已提交</span>
-            {{#     }else if(item.process_status == 2){    }}
-            | <span class="status_2">已受理</span>
-            {{#     }else{                              }}
-            | <span class="status_3">已完结</span>
-            {{#    } }}
+            <a style="font-size: 16px" href="../inspect/detail.html?id={{ item.id}}&type={{item.dataType}}">{{= !item.title?null:item.title}}</a>
+            <span class="layui-badge" style="background-color:cornflowerblue">{{ !item.type?null:item.type}}</span>
+            | <span class="status_1" style="background-color:cadetblue">{{= item.process_status}}</span>
         </h2>
     </li>
     {{#  }); }}
